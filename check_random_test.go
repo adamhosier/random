@@ -18,6 +18,10 @@ var (
 	"0000000000000000000000000000000000000000000000000011111111111111111111111111111111111111111111111111",
 	"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 	"0000000011111111000000000000000000001111110000000011111100000000001111111000000000000000000111111111",
+	"0011111100000000000000001111111111111111111111000000000000000000000000000000000000111111111111111000" +
+		"0000000001111111111111111000",
+	"1100110000010101011011000100110011100000000000100100110101010001000100111101011010000000110101111100" +
+		"1100111001101101100010110010",
   }
   // Will hold respective BitStrings for string cases above
   testBitStrings = make([]*BitString, len(testStrings))
@@ -73,7 +77,7 @@ func TestBlockFrequencyCheck(t *testing.T) {
   }
 }
 
-func TestRunsTest(t *testing.T) {
+func TestRunsCheck(t *testing.T) {
   cases := []test{
 	{ testBitStrings[0], true },
 	{ testBitStrings[1], false },
@@ -82,9 +86,24 @@ func TestRunsTest(t *testing.T) {
 	{ testBitStrings[4], false },
   }
   for _, c := range cases {
-	got := RunsTest(c.in)
+	got := RunsCheck(c.in)
 	if got != c.want {
-	  t.Errorf("RunsTest(%q) == %t, want %t", c.in, got, c.want)
+	  t.Errorf("RunsCheck(%q) == %t, want %t", c.in, got, c.want)
 	}
   }
 }
+
+func TestLongestRunCheck(t *testing.T) {
+  cases := []test{
+	{ testBitStrings[5], false },
+	{ testBitStrings[6], true },
+  }
+  for _, c := range cases {
+	got := LongestRunCheck(c.in)
+	if got != c.want {
+	  t.Errorf("LongestRunCheck(%q) == %t, want %t", c.in, got, c.want)
+	}
+  }
+}
+
+

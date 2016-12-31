@@ -21,3 +21,9 @@ func BitStringFromString(s string) (*BitString, error) {
   }
   return &BitString{n, bs}, nil
 }
+
+func (bs *BitString) String() string {
+  var s string
+  for _, b := range bs.data { if b { s += "1"} else { s += "0" } }
+  return s
+}

@@ -14,7 +14,7 @@ func AlmostEqual(val, diff float64) bool {
 }
 
 // Uses the modified Lentz method to compute the incomplete Gamma function using a continued fraction
-func igameContinuedFraction(a, x float64) float64 {
+func igamcContinuedFraction(a, x float64) float64 {
   minValue := math.SmallestNonzeroFloat64
 
   // Start computing terms at n = 1.
@@ -47,7 +47,7 @@ func igameContinuedFraction(a, x float64) float64 {
 }
 
 // Computes incomplete Gamma by summing a series
-func igameSeries(a, x float64) float64 {
+func igamcSeries(a, x float64) float64 {
   an := a
   termVal := 1 / an
   sum := 1 / an
@@ -68,22 +68,22 @@ func igameSeries(a, x float64) float64 {
 }
 
 // Incomplete Gamma function (P)
-func igameP(a, x float64) float64 {
+func igamcP(a, x float64) float64 {
   if x < 0 || a <= 0 {
 	return 0;
   }
 
   if x < a + 1 {
-	return igameSeries(a, x)
+	return igamcSeries(a, x)
   } else {
 	// Continued fraction converges more quickly in this range
-	return 1 - igameContinuedFraction(a, x)
+	return 1 - igamcContinuedFraction(a, x)
   }
 }
 
 // Incomplete Gamma function (Q)
-func igameQ(a, x float64) float64 {
-  return 1 - igameP(a, x)
+func igamc(a, x float64) float64 {
+  return 1 - igamcP(a, x)
 }
 
 // Count number of ones in a list of bools
