@@ -25,7 +25,7 @@ func FrequencyCheck(bs *BitString) bool {
   // Calculate P value
   p := math.Erfc(s / math.Sqrt2)
 
-  return p > SIGNIFICANCE
+  return p >= SIGNIFICANCE
 }
 
 // Tests the proportion of ones in each block of size [m]
@@ -35,11 +35,7 @@ func BlockFrequencyCheck(bs *BitString, m int) bool {
   var pi = make([]float64, numblocks)
   for i := 0; i < numblocks; i++ {
 	// Calculate pi value for this block
-	var sum int
-	for _, b := range bs.data[i*m:(i+1)*m] {
-	  if b { sum++ }
-	}
-	pi[i] = float64(sum) / float64(m)
+	pi[i] = proportion(bs.data[i*m:(i+1)*m], m)
   }
 
   // Calculate chisq statistic
@@ -50,6 +46,25 @@ func BlockFrequencyCheck(bs *BitString, m int) bool {
   // find p value using incomplete gamma function
   p := igameQ(float64(numblocks) / 2.0, chi / 2.0)
 
-  return p > SIGNIFICANCE
+  return p >= SIGNIFICANCE
 }
 
+func RunsTest(bs *BitString) bool {
+  // Test the proportion of ones to zeros, as this must be valid for runs test to succeed
+  pi := proportion(bs.data, bs.length)
+  if math.Abs(pi - 0.5) >= 2.0 / math.Sqrt(10) { return false }
+
+  // Calculate runs test statistic
+  var sum int
+  for i, b := range bs.data {
+	if i < bs.length - 1 && b != bs.data[i + 1] { sum++ }
+  }
+  s := float64(sum + 1)
+
+  // Calculate p value
+  tmp := 2.0 * pi * (1.0 - pi)
+  n := float64(bs.length)
+  p := math.Erfc(math.Abs(s - tmp * n) / (tmp * math.Sqrt(2 * n)))
+
+  return p >= SIGNIFICANCE
+}
