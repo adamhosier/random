@@ -29,19 +29,19 @@ func FrequencyCheck(bs *BitString) bool {
 }
 
 // Tests the proportion of ones in each block of size [m]
-func BlockFrequencyCheck(bs *BitString, m int) bool {
-  numblocks := bs.length / m
+func BlockFrequencyCheck(bs *BitString, M int) bool {
   // Partition string into blocks of length m
+  blocks := bs.Partition(M)
+
+  // Calculate proportion of ones to zeros in each block
+  numblocks := bs.length / M
   var pi = make([]float64, numblocks)
-  for i := 0; i < numblocks; i++ {
-	// Calculate pi value for this block
-	pi[i] = proportion(bs.data[i*m:(i+1)*m], m)
-  }
+  for i, block := range blocks { pi[i] = block.Proportion() }
 
   // Calculate chisq statistic
   var sum float64
   for _, p := range pi { sum += math.Pow((p - 0.5), 2) }
-  chi := 4.0 * float64(m) * sum
+  chi := 4.0 * float64(M) * sum
 
   // find p value using incomplete gamma function
   p := igamc(float64(numblocks) / 2.0, chi / 2.0)
@@ -52,7 +52,7 @@ func BlockFrequencyCheck(bs *BitString, m int) bool {
 // Tests the amount of consecutive ones or zeros over the whole string
 func RunsCheck(bs *BitString) bool {
   // Test the proportion of ones to zeros, as this must be valid for runs test to succeed
-  pi := proportion(bs.data, bs.length)
+  pi := bs.Proportion()
   if math.Abs(pi - 0.5) >= 2.0 / math.Sqrt(10) { return false }
 
   // Calculate runs test statistic
@@ -74,31 +74,31 @@ func RunsCheck(bs *BitString) bool {
 // Assumes length of [bs] must be either 128, 6272 or 750,000
 func LongestRunCheck(bs *BitString) bool {
   // Find parameters for different lengths of [bs]
-  var m, k int
+  var M, k int
   var pi []float64
   if bs.length == 128 {
-	m = 8
+	M = 8
 	k = 4
 	pi = []float64{0.2148, 0.3672, 0.2305, 0.1875}
   } else if bs.length == 6272 {
-	m = 128
+	M = 128
 	k = 6
 	pi = []float64{0.1174, 0.2430, 0.2493, 0.1752, 0.1027, 0.1124}
   } else if bs.length == 750000 {
-	m = 100000
+	M = 100000
 	k = 7
 	pi = []float64{0.0882, 0.2092, 0.2483, 0.1933, 0.1208, 0.0675, 0.0727}
   } else {
 	return false
   }
-  n := bs.length / m
+  n := bs.length / M
 
   // Find longest run in each block, recording the lowest and highest run sizes
+  blocks := bs.Partition(M)
   longestRuns := make([]int, n)
-  for i := 0; i < n; i++ {
-	block := bs.data[i * m:(i + 1) * m]
+  for i, block := range blocks {
 	current := 0
-	for _, b := range block {
+	for _, b := range block.data {
 	  if b { current++ } else { current = 0 }
 	  if current > longestRuns[i] { longestRuns[i] = current }
 	}
@@ -139,3 +139,54 @@ func LongestRunCheck(bs *BitString) bool {
   p := igamc(float64(k - 1) / 2.0, chi / 2.0)
   return p >= SIGNIFICANCE
 }
+
+func NonOverlappingTemplateMatchingCheck(bs, template *BitString) bool {
+  // Set parameters, including theoretical mean and variance
+  n := bs.length
+  m := template.length
+  N := 8 // number of blocks is fixed to 8
+  M := n / N // block size
+  mean := float64(M - m + 1) / math.Pow(2.0, float64(m))
+  variance := float64(M) * ((1 / math.Pow(2.0, float64(m))) - float64(2 * m - 1) / math.Pow(2.0, float64(2 * m)))
+
+  // Partition the string into blocks
+  blocks := bs.Partition(M)
+  w := make([]int, N)
+  for i, block := range blocks {
+	// Scan block for template matches
+	for j := 0; j < M - m + 1; j++ {
+	  if block.HasTemplateAt(template, j) {
+		w[i]++
+		j += m - 2
+	  }
+	}
+  }
+
+  // Compute chisq value
+  var chi float64
+  for _, v := range w { chi += math.Pow(float64(v) - mean, 2.0) / variance }
+
+  // Compute p value
+  p := igamc(float64(N) / 2.0, chi / 2.0)
+  return p >= SIGNIFICANCE
+}
+
+// TODO: implement overlapping template matching check
+//func OverlappingTemplateMatchingCheck(bs *BitString) bool {
+//  return true
+//}
+
+// TODO: implement serial check
+//func SerialCheck(bs *BitString) bool {
+//  return true
+//}
+
+// TODO: implement approximate entropy check
+//func ApproximateEntropyCheck(bs *BitString) bool {
+//  return true
+//}
+
+// TODO: implement cumulative sums check
+//func CumulativeSumsCheck(bs *BitString) bool {
+//  return true
+//}

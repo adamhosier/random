@@ -85,17 +85,3 @@ func igamcP(a, x float64) float64 {
 func igamc(a, x float64) float64 {
   return 1 - igamcP(a, x)
 }
-
-// Count number of ones in a list of bools
-func countOnes(bs *[]bool) int {
-  var sum int
-  for _, b := range *bs {
-	if b { sum++ }
-  }
-  return sum
-}
-
-// Calculates proportion of ones to zeros in a list of bools
-func proportion(bs []bool, size int) float64 {
-  return float64(countOnes(&bs)) / float64(size)
-}
