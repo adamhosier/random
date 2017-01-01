@@ -35,11 +35,11 @@ func BlockFrequencyCheck(bs *BitString, M int) bool {
 
   // Calculate proportion of ones to zeros in each block
   numblocks := bs.length / M
-  var pi = make([]float64, numblocks)
+  pi := make([]float64, numblocks)
   for i, block := range blocks { pi[i] = block.Proportion() }
 
   // Calculate chisq statistic
-  var sum float64
+  sum := 0.0
   for _, p := range pi { sum += math.Pow((p - 0.5), 2) }
   chi := 4.0 * float64(M) * sum
 
@@ -56,7 +56,7 @@ func RunsCheck(bs *BitString) bool {
   if math.Abs(pi - 0.5) >= 2.0 / math.Sqrt(10) { return false }
 
   // Calculate runs test statistic
-  var sum int
+  sum := 0
   for i, b := range bs.data {
 	if i < bs.length - 1 && b != bs.data[i + 1] { sum++ }
   }
@@ -74,7 +74,7 @@ func RunsCheck(bs *BitString) bool {
 // Assumes length of [bs] must be either 128, 6272 or 750,000
 func LongestRunCheck(bs *BitString) bool {
   // Find parameters for different lengths of [bs]
-  var M, k int
+  M, k := 0, 0
   var pi []float64
   if bs.length == 128 {
 	M = 8
@@ -104,7 +104,8 @@ func LongestRunCheck(bs *BitString) bool {
 	}
   }
 
-  // Categorise these run lengths, where each element contains the number of blocks with some run length // Also build the theoretical probabilities pi
+  // Categorise these run lengths, where each element contains the number of blocks with some run length
+  // Also build the theoretical probabilities pi
   v := make([]int, k)
   for _, r := range longestRuns {
 	if bs.length == 128 {
@@ -129,7 +130,7 @@ func LongestRunCheck(bs *BitString) bool {
   }
 
   // Calculate chisq statistic
-  var chi float64
+  chi := 0.0
   for i, p := range v {
 	npi := pi[i] * float64(n)
 	chi += math.Pow((float64(p) - npi), 2) / npi
@@ -140,6 +141,7 @@ func LongestRunCheck(bs *BitString) bool {
   return p >= SIGNIFICANCE
 }
 
+// Tests a [template] bitstring against [bs] to find if the template occurs significantly often
 func NonOverlappingTemplateMatchingCheck(bs, template *BitString) bool {
   // Set parameters, including theoretical mean and variance
   n := bs.length
@@ -157,13 +159,13 @@ func NonOverlappingTemplateMatchingCheck(bs, template *BitString) bool {
 	for j := 0; j < M - m + 1; j++ {
 	  if block.HasTemplateAt(template, j) {
 		w[i]++
-		j += m - 2
+		j += m - 2 // skip the remainder of the pattern
 	  }
 	}
   }
 
   // Compute chisq value
-  var chi float64
+  chi := 0.0
   for _, v := range w { chi += math.Pow(float64(v) - mean, 2.0) / variance }
 
   // Compute p value
@@ -171,15 +173,51 @@ func NonOverlappingTemplateMatchingCheck(bs, template *BitString) bool {
   return p >= SIGNIFICANCE
 }
 
-// TODO: implement overlapping template matching check
-//func OverlappingTemplateMatchingCheck(bs *BitString) bool {
-//  return true
-//}
+// Checks every binary block over a few sizes to ensure they don't occur too commonly
+func SerialCheck(bs *BitString) bool {
+  // Set parameters
+  n := bs.length
+  m := int(math.Floor(math.Log2(float64(n)))) - 3
 
-// TODO: implement serial check
-//func SerialCheck(bs *BitString) bool {
-//  return true
-//}
+
+  // Extend string by adding m-1 bits from its start to its end
+  ebs := bs.Extend(bs.First(m - 1))
+
+  // Get all m, m-1 and m-2 bit blocks, and the number of times the occur in [bs]
+  v1 := make([]int, int(math.Pow(2.0, float64(m))))
+  for i, t := range BitStringsOfLength(m) {
+	for j := 0; j < n; j++ { if ebs.HasTemplateAt(t, j) { v1[i]++ } }
+  }
+  v2 := make([]int, int(math.Pow(2.0, float64(m - 1))))
+  for i, t := range BitStringsOfLength(m - 1) {
+	for j := 0; j < n; j++ { if ebs.HasTemplateAt(t, j) { v2[i]++ } }
+  }
+  v3 := make([]int, int(math.Pow(2.0, float64(m - 2))))
+  for i, t := range BitStringsOfLength(m - 2) {
+	for j := 0; j < n; j++ { if ebs.HasTemplateAt(t, j) { v3[i]++ } }
+  }
+
+  // Compute psisq values
+  sum := 0.0
+  for _, v := range v1 { sum += math.Pow(float64(v), 2.0) }
+  psi1 := (math.Pow(2.0, float64(m)) / float64(n)) * sum - float64(n)
+  sum = 0.0
+  for _, v := range v2 { sum += math.Pow(float64(v), 2.0) }
+  psi2 := (math.Pow(2.0, float64(m - 1)) / float64(n)) * sum - float64(n)
+  sum = 0.0
+  for _, v := range v3 { sum += math.Pow(float64(v), 2.0) }
+  psi3 := (math.Pow(2.0, float64(m - 2)) / float64(n)) * sum - float64(n)
+
+  // Compute delta psysq
+  dpsi1 := psi1 - psi2
+  dpsi2 := psi1 - 2.0 * psi2 + psi3
+
+  // Compute p values
+  p1 := igamc(math.Pow(2.0, float64(m - 2)), dpsi1 / 2.0)
+  p2 := igamc(math.Pow(2.0, float64(m - 3)), dpsi2 / 2.0)
+
+  return p1 >= SIGNIFICANCE && p2 >= SIGNIFICANCE
+}
 
 // TODO: implement approximate entropy check
 //func ApproximateEntropyCheck(bs *BitString) bool {

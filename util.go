@@ -69,9 +69,7 @@ func igamcSeries(a, x float64) float64 {
 
 // Incomplete Gamma function (P)
 func igamcP(a, x float64) float64 {
-  if x < 0 || a <= 0 {
-	return 0;
-  }
+  if x < 0 || a <= 0 { return 0.0 }
 
   if x < a + 1 {
 	return igamcSeries(a, x)

@@ -1,6 +1,9 @@
 package random
 
-import "errors"
+import (
+  "errors"
+  "math"
+)
 
 type BitString struct {
   length     int
@@ -10,7 +13,7 @@ type BitString struct {
 // Builds a BitString from a string of zeros and ones e.g. "01101001"
 func BitStringFromString(s string) (*BitString, error) {
   n := len(s)
-  var bs = make([]bool, n)
+  bs := make([]bool, n)
   for i, c := range s {
 	if c == '1' {
 	  bs[i] = true
@@ -23,9 +26,37 @@ func BitStringFromString(s string) (*BitString, error) {
   return &BitString{n, bs}, nil
 }
 
+// Gets a slice of all bit strings of length [n]
+func BitStringsOfLength(n int) []*BitString {
+  // Base case
+  if n == 1 { return []*BitString{{1, []bool{false}}, {1, []bool{true}}} }
+
+  // Recursive case
+  bss := make([]*BitString, int(math.Pow(2.0, float64(n))))
+  for i, bs := range BitStringsOfLength(n - 1) {
+	d := make([]bool, bs.length)
+	copy(d, bs.data)
+	bss[2*i] = &BitString{n, append(d, false)}
+ 	bss[2*i + 1] = &BitString{n, append(d, true)}
+  }
+  return bss
+}
+
 // Gets the value of the bit at position [i] in [bs]
 func (bs *BitString) At(i int) bool {
   return bs.data[i]
+}
+
+// Gets the first [n] bits from [bs]
+func (bs *BitString) First(n int) *BitString {
+  d := make([]bool, n)
+  copy(d, bs.data[:n])
+  return &BitString{n, d}
+}
+
+// Adds [bs1] to the end of [bs] returning a new BitString
+func (bs *BitString) Extend(bs1 *BitString) *BitString {
+  return &BitString{bs.length + bs1.length, append(bs.data, bs1.data...)}
 }
 
 // Partitions [bs] into blocks of length [len] discarding extra bits at the end
