@@ -83,3 +83,8 @@ func igamcP(a, x float64) float64 {
 func igamc(a, x float64) float64 {
   return 1 - igamcP(a, x)
 }
+
+// Standard normal CDF
+func stdNormal(x float64) float64 {
+  return 0.5 * (math.Erfc(-x/math.Sqrt2))
+}

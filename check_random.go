@@ -1,4 +1,4 @@
-/* Implements some of the statistical tests described in here
+/* Implements some of the NIST randomness statistical tests described in here
  * http://csrc.nist.gov/publications/nistpubs/800-22-rev1a/SP800-22rev1a.pdf
  *
  * Adam Hosier 2017
@@ -219,6 +219,7 @@ func SerialCheck(bs *BitString) bool {
   return p1 >= SIGNIFICANCE && p2 >= SIGNIFICANCE
 }
 
+// Compares all possible bit patterns of a certain length to see if any occur significantly often
 func ApproximateEntropyCheck(bs *BitString) bool {
   // Set parameters
   n := bs.length
@@ -256,7 +257,32 @@ func ApproximateEntropyCheck(bs *BitString) bool {
   return p >= SIGNIFICANCE
 }
 
-// TODO: implement cumulative sums check
-//func CumulativeSumsCheck(bs *BitString) bool {
-//  return true
-//}
+// Find consecutive partial sums from the start, checking they don't get too high or low
+func CumulativeSumsCheck(bs *BitString) bool {
+  // Find partial sums, saving the max in z
+  n := bs.length
+  s := make([]int, n)
+  z := 0
+  for i, b := range bs.data {
+	var v int
+	if b { v = 1 } else { v = -1 }
+	if i == 0 { s[0] = v } else { s[i] = s[i-1] + v }
+	sa := int(math.Abs(float64(s[i])))
+	if sa > z { z = sa }
+  }
+
+  // Find p value
+  sum1, sum2 := 0.0, 0.0
+  max := (n/z - 1) / 4
+  for k := (-n/z + 1) / 4; k <= max; k++ {
+	sqrtn := math.Sqrt(float64(n))
+	sum1 += stdNormal(float64((4*k + 1) * z) / sqrtn) - stdNormal(float64((4*k - 1) * z) / sqrtn)
+  }
+  for k := (-n/z - 3) / 4; k <= max; k++ {
+	sqrtn := math.Sqrt(float64(n))
+	sum2 += stdNormal(float64((4*k + 3) * z) / sqrtn) - stdNormal(float64((4*k + 1) * z) / sqrtn)
+  }
+  p := 1.0 - sum1 + sum2
+
+  return p >= SIGNIFICANCE
+}

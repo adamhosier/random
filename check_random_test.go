@@ -193,6 +193,24 @@ func TestApproximateEntropyCheck(t *testing.T) {
   }
 }
 
+func TestCumulativeSumsCheck(t *testing.T) {
+  cases := []test{
+	{ in: testBitStrings[0], want: true },
+	{ in: testBitStrings[1], want: true },
+	{ in: testBitStrings[2], want: false },
+	{ in: testBitStrings[3], want: false },
+	{ in: testBitStrings[4], want: false },
+	{ in: testBitStrings[5], want: true },
+	{ in: testBitStrings[6], want: true },
+	{ in: testBitStrings[7], want: true },
+  }
+  for _, c := range cases {
+	got := CumulativeSumsCheck(c.in)
+	if got != c.want {
+	  t.Errorf("CumulativeSumsCheck(%q) == %t, want %t", c.in, got, c.want)
+	}
+  }
+}
 
 
 
