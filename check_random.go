@@ -174,11 +174,11 @@ func NonOverlappingTemplateMatchingCheck(bs, template *BitString) bool {
 }
 
 // Checks every binary block over a few sizes to ensure they don't occur too commonly
+// Assumes bs.length >
 func SerialCheck(bs *BitString) bool {
   // Set parameters
   n := bs.length
   m := int(math.Floor(math.Log2(float64(n)))) - 3
-
 
   // Extend string by adding m-1 bits from its start to its end
   ebs := bs.Extend(bs.First(m - 1))
@@ -219,10 +219,42 @@ func SerialCheck(bs *BitString) bool {
   return p1 >= SIGNIFICANCE && p2 >= SIGNIFICANCE
 }
 
-// TODO: implement approximate entropy check
-//func ApproximateEntropyCheck(bs *BitString) bool {
-//  return true
-//}
+func ApproximateEntropyCheck(bs *BitString) bool {
+  // Set parameters
+  n := bs.length
+  m := int(math.Floor(math.Log2(float64(n)))) - 5
+
+  // Extend string by adding m bits from its start to its end
+  ebs := bs.Extend(bs.First(m))
+
+  // Count occurrences of each m bit block in bs
+  numBlocks := int(math.Pow(2.0, float64(m)))
+  c1 := make([]float64, numBlocks)
+  for i := 0; i < n; i++ { c1[ebs.Substring(i, m).Int()]++ }
+  for i := 0; i < numBlocks; i++ { c1[i] /= float64(n) }
+
+  // Compute phi for m bit blocks
+  phi1 := 0.0
+  for _, c := range c1 { if c != 0 { phi1 += c * math.Log(c) } }
+
+  // Count occurrences of each m+1 bit block in bs
+  numBlocks = int(math.Pow(2.0, float64(m + 1)))
+  c2 := make([]float64, numBlocks)
+  for i := 0; i < n; i++ { c2[ebs.Substring(i, m + 1).Int()]++ }
+  for i := 0; i < numBlocks; i++ { c2[i] /= float64(n) }
+
+  // Compute phi for m+1 bit blocks
+  phi2 := 0.0
+  for _, c := range c2 { if c != 0 { phi2 += c * math.Log(c) } }
+
+  // Compute chisq statistic
+  chi := float64(2 * n) * (math.Log(2.0) - (phi1 - phi2))
+
+  // Compute p value
+  p := igamc(math.Pow(2.0, float64(m-1)), chi / 2.0)
+
+  return p >= SIGNIFICANCE
+}
 
 // TODO: implement cumulative sums check
 //func CumulativeSumsCheck(bs *BitString) bool {

@@ -54,6 +54,13 @@ func (bs *BitString) First(n int) *BitString {
   return &BitString{n, d}
 }
 
+// Finds the substring of [bs] starting at [start] of length [len]
+func (bs *BitString) Substring(start, len int) *BitString {
+  d := make([]bool, len)
+  copy(d, bs.data[start:start + len])
+  return &BitString{len, d}
+}
+
 // Adds [bs1] to the end of [bs] returning a new BitString
 func (bs *BitString) Extend(bs1 *BitString) *BitString {
   return &BitString{bs.length + bs1.length, append(bs.data, bs1.data...)}
@@ -93,4 +100,13 @@ func (bs *BitString) String() string {
   var s string
   for _, b := range bs.data { if b { s += "1"} else { s += "0" } }
   return s
+}
+
+// Converts [bs] to an integer (max length 64)
+func (bs *BitString) Int() int {
+  var n int
+  for i, b := range bs.data {
+	if b { n |= 0x1 << uint64(bs.length - i - 1) }
+  }
+  return n
 }

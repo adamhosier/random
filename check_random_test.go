@@ -174,6 +174,25 @@ func TestSerialCheck(t *testing.T) {
   }
 }
 
+func TestApproximateEntropyCheck(t *testing.T) {
+  cases := []test{
+	{ in: testBitStrings[0], want: true },
+	{ in: testBitStrings[1], want: false },
+	{ in: testBitStrings[2], want: false },
+	{ in: testBitStrings[3], want: false },
+	{ in: testBitStrings[4], want: false },
+	{ in: testBitStrings[5], want: false },
+	{ in: testBitStrings[6], want: false },
+	{ in: testBitStrings[7], want: true },
+  }
+  for _, c := range cases {
+	got := ApproximateEntropyCheck(c.in)
+	if got != c.want {
+	  t.Errorf("ApproximateEntropyCheck(%q) == %t, want %t", c.in, got, c.want)
+	}
+  }
+}
+
 
 
 
