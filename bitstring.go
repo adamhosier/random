@@ -1,12 +1,12 @@
 package random
 
 import (
-  "errors"
   "math"
+  "fmt"
 )
 
 type BitString struct {
-  length     int
+  length int
   data   []bool
 }
 
@@ -20,7 +20,7 @@ func BitStringFromString(s string) (*BitString, error) {
 	} else if c == '0' {
 	  bs[i] = false
 	} else {
-	  return nil, errors.New("bitstring: Invalid character in BitStringFromString")
+	  return nil, fmt.Errorf("bitstring: Invalid character '%v' in BitStringFromString", c)
 	}
   }
   return &BitString{n, bs}, nil
@@ -70,7 +70,7 @@ func (bs *BitString) Extend(bs1 *BitString) *BitString {
 func (bs *BitString) Partition(len int) []*BitString {
   bss := make([]*BitString, bs.length / len)
   for i := 0; i < bs.length / len; i++ {
-  	bss[i] = &BitString{len, bs.data[i*len:(i+1)*len]}
+    bss[i] = &BitString{len, bs.data[i*len:(i+1)*len]}
   }
   return bss
 }
