@@ -1,26 +1,46 @@
 package random
 
 import (
-  "fmt"
-  "os/exec"
-  "os"
+	"fmt"
+	"os"
+	"os/exec"
 )
 
-// Implement this interface
 type Input struct {
-  binaryPath string
+	binaryPath string
+	buffer     *[]byte
 }
 
+// Builds a new input type relating to the binary at path [binPath]
 func NewInput(binPath string) (*Input, error) {
-  if _, err := os.Stat(binPath); err == nil {
-    return &Input{binPath}, nil
-  } else {
-    return nil, fmt.Errorf("input: file not found '%x'\n", binPath)
-  }
+	// check file exists
+	if _, err := os.Stat(binPath); err == nil {
+		return &Input{binPath, &[]byte{}}, nil
+	} else {
+		return nil, fmt.Errorf("input: file not found '%x'\n", binPath)
+	}
 }
 
-func (i *Input) GetBits(n int)  {
-  output, _ := exec.Command(i.binaryPath).Output()
-  fmt.Println(output);
-}
+// Fetches n bits from the buffer. If the buffer is empty, fetch a new batch of bits first
+func (i *Input) GetBits(n int) *BitString {
+	if n <= 0 {
+		return nil
+	}
+	if len(*i.buffer) == 0 {
+		// run binary, then collect it's stdout to the buffer
+		output, _ := exec.Command(i.binaryPath).Output()
+		i.buffer = &output
+	}
 
+	// round up n bits to closest byte boundary
+	numBytes := ((n - 1) / 8) + 1
+
+	// take those bytes from the buffer
+	bytes := (*i.buffer)[:numBytes]
+	tmp := (*i.buffer)[numBytes:]
+	i.buffer = &tmp
+
+	bs, _ := BitStringFromBytes(&bytes)
+
+	return bs.Substring(0, n)
+}
