@@ -39,8 +39,8 @@ func (i *Input) GetBits(n int) *BitString {
 	bytes := (*i.buffer)[:numBytes]
 	tmp := (*i.buffer)[numBytes:]
 	i.buffer = &tmp
-
 	bs, _ := BitStringFromBytes(&bytes)
 
+	// discard extra bits
 	return bs.Substring(0, n)
 }

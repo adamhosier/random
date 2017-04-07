@@ -34,7 +34,7 @@ func TestGetBits(t *testing.T) {
 		i, _ := NewInput(c.path)
 		bs := i.GetBits(100)
 		if bs.length != 100 {
-			t.Errorf("GetBits() retreived the wrong amount of bits")
+			t.Error("GetBits() retreived the wrong amount of bits")
 		}
 	}
 }

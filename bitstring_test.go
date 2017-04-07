@@ -38,8 +38,7 @@ func TestBitStringFromBytes(t *testing.T) {
 		{byteInput: &[]byte{41}, wantError: false},
 	}
 	for _, c := range cases {
-		bs, err := BitStringFromBytes(c.byteInput)
-		println(bs.String())
+		_, err := BitStringFromBytes(c.byteInput)
 		if err == nil {
 			if c.wantError {
 				t.Errorf("BitStringFromUTF8(\"%v\") expected an error to be thrown", c.strInput)
@@ -121,10 +120,10 @@ func TestBitString_Substring(t *testing.T) {
 	bs1, _ := BitStringFromString("10101")
 	bs2, _ := BitStringFromString("010")
 	start := 1
-	len := 3
-	got := bs1.Substring(start, len)
+	length := 3
+	got := bs1.Substring(start, length)
 	if !got.Equals(bs2) {
-		t.Errorf("BitString.Substring(%d, %d) == %q, expected %q", start, len, got, bs2)
+		t.Errorf("BitString.Substring(%d, %d) == %q, expected %q", start, length, got, bs2)
 	}
 }
 
@@ -147,7 +146,7 @@ func TestBitString_Partition(t *testing.T) {
 	got := bs.Partition(2)
 	for i, bs := range got {
 		if !bs.Equals(bss[i]) {
-			t.Errorf("BitString.Partition produced an invalid partition")
+			t.Error("BitString.Partition produced an invalid partition")
 		}
 	}
 }

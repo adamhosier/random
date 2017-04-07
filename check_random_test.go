@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-type bitstringTest struct {
+type bitStringTest struct {
 	in       *BitString
 	template *BitString
 	want     bool
@@ -58,7 +58,7 @@ func TestMain(m *testing.M) {
 // TEST CASES START
 
 func TestFrequencyCheck(t *testing.T) {
-	cases := []bitstringTest{
+	cases := []bitStringTest{
 		{in: testBitStrings[0], want: true},
 		{in: testBitStrings[1], want: true},
 		{in: testBitStrings[2], want: true},
@@ -77,7 +77,7 @@ func TestFrequencyCheck(t *testing.T) {
 }
 
 func TestBlockFrequencyCheck(t *testing.T) {
-	cases := []bitstringTest{
+	cases := []bitStringTest{
 		{in: testBitStrings[0], want: true},
 		{in: testBitStrings[1], want: true},
 		{in: testBitStrings[2], want: false},
@@ -97,7 +97,7 @@ func TestBlockFrequencyCheck(t *testing.T) {
 }
 
 func TestRunsCheck(t *testing.T) {
-	cases := []bitstringTest{
+	cases := []bitStringTest{
 		{in: testBitStrings[0], want: true},
 		{in: testBitStrings[1], want: false},
 		{in: testBitStrings[2], want: false},
@@ -116,7 +116,7 @@ func TestRunsCheck(t *testing.T) {
 }
 
 func TestLongestRunCheck(t *testing.T) {
-	cases := []bitstringTest{
+	cases := []bitStringTest{
 		{in: testBitStrings[6], want: false},
 		{in: testBitStrings[7], want: true},
 	}
@@ -129,7 +129,7 @@ func TestLongestRunCheck(t *testing.T) {
 }
 
 func TestNonOverlappingTemplateMatchingCheck(t *testing.T) {
-	cases := []bitstringTest{
+	cases := []bitStringTest{
 		{testBitStrings[0], templateBitStrings[0], true},
 		{testBitStrings[0], templateBitStrings[1], true},
 		{testBitStrings[0], templateBitStrings[2], true},
@@ -156,7 +156,7 @@ func TestNonOverlappingTemplateMatchingCheck(t *testing.T) {
 }
 
 func TestSerialCheck(t *testing.T) {
-	cases := []bitstringTest{
+	cases := []bitStringTest{
 		{in: testBitStrings[0], want: true},
 		{in: testBitStrings[1], want: false},
 		{in: testBitStrings[2], want: false},
@@ -175,7 +175,7 @@ func TestSerialCheck(t *testing.T) {
 }
 
 func TestApproximateEntropyCheck(t *testing.T) {
-	cases := []bitstringTest{
+	cases := []bitStringTest{
 		{in: testBitStrings[0], want: true},
 		{in: testBitStrings[1], want: false},
 		{in: testBitStrings[2], want: false},
@@ -194,7 +194,7 @@ func TestApproximateEntropyCheck(t *testing.T) {
 }
 
 func TestCumulativeSumsCheck(t *testing.T) {
-	cases := []bitstringTest{
+	cases := []bitStringTest{
 		{in: testBitStrings[0], want: true},
 		{in: testBitStrings[1], want: true},
 		{in: testBitStrings[2], want: false},

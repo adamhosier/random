@@ -168,7 +168,7 @@ func LongestRunCheck(bs *BitString) bool {
 	return p >= SIGNIFICANCE
 }
 
-// Tests a [template] bitstring against [bs] to find if the template occurs significantly often
+// Tests a [template] BitString against [bs] to find if the template occurs significantly often
 func NonOverlappingTemplateMatchingCheck(bs, template *BitString) bool {
 	// Set parameters, including theoretical mean and variance
 	n := bs.length
