@@ -26,10 +26,11 @@ func (i *Input) GetBits(n int) *BitString {
 	if n <= 0 {
 		return nil
 	}
-	if len(*i.buffer) == 0 {
+	for len(*i.buffer) < n {
 		// run binary, then collect it's stdout to the buffer
 		output, _ := exec.Command(i.binaryPath).Output()
-		i.buffer = &output
+		newbuffer := append(*i.buffer, output...)
+		i.buffer = &newbuffer
 	}
 
 	// round up n bits to closest byte boundary

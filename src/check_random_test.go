@@ -70,8 +70,8 @@ func TestFrequencyCheck(t *testing.T) {
 	}
 	for _, c := range cases {
 		got := FrequencyCheck(c.in)
-		if got != c.want {
-			t.Errorf("FrequencyCheck(%q) == %t, want %t", c.in, got, c.want)
+		if got.result != c.want {
+			t.Errorf("FrequencyCheck(%q) == %t, want %t", c.in, got.result, c.want)
 		}
 	}
 }
@@ -89,8 +89,8 @@ func TestBlockFrequencyCheck(t *testing.T) {
 	}
 	for _, c := range cases {
 		got := BlockFrequencyCheck(c.in, 10)
-		if got != c.want {
-			t.Errorf("BlockFrequencyCheck(%q) == %t, want %t", c.in, got, c.want)
+		if got.result != c.want {
+			t.Errorf("BlockFrequencyCheck(%q) == %t, want %t", c.in, got.result, c.want)
 		}
 
 	}
@@ -109,8 +109,8 @@ func TestRunsCheck(t *testing.T) {
 	}
 	for _, c := range cases {
 		got := RunsCheck(c.in)
-		if got != c.want {
-			t.Errorf("RunsCheck(%q) == %t, want %t", c.in, got, c.want)
+		if got.result != c.want {
+			t.Errorf("RunsCheck(%q) == %t, want %t", c.in, got.result, c.want)
 		}
 	}
 }
@@ -122,8 +122,8 @@ func TestLongestRunCheck(t *testing.T) {
 	}
 	for _, c := range cases {
 		got := LongestRunCheck(c.in)
-		if got != c.want {
-			t.Errorf("LongestRunCheck(%q) == %t, want %t", c.in, got, c.want)
+		if got.result != c.want {
+			t.Errorf("LongestRunCheck(%q) == %t, want %t", c.in, got.result, c.want)
 		}
 	}
 }
@@ -149,8 +149,8 @@ func TestNonOverlappingTemplateMatchingCheck(t *testing.T) {
 	}
 	for _, c := range cases {
 		got := NonOverlappingTemplateMatchingCheck(c.in, c.template)
-		if got != c.want {
-			t.Errorf("NonOverlappingTemplateMatchingCheck(%q, %q) == %t, want %t", c.in, c.template, got, c.want)
+		if got.result != c.want {
+			t.Errorf("NonOverlappingTemplateMatchingCheck(%q, %q) == %t, want %t", c.in, c.template, got.result, c.want)
 		}
 	}
 }
@@ -168,8 +168,8 @@ func TestSerialCheck(t *testing.T) {
 	}
 	for _, c := range cases {
 		got := SerialCheck(c.in)
-		if got != c.want {
-			t.Errorf("SerialCheck(%q) == %t, want %t", c.in, got, c.want)
+		if got.result != c.want {
+			t.Errorf("SerialCheck(%q) == %t, want %t", c.in, got.result, c.want)
 		}
 	}
 }
@@ -187,8 +187,8 @@ func TestApproximateEntropyCheck(t *testing.T) {
 	}
 	for _, c := range cases {
 		got := ApproximateEntropyCheck(c.in)
-		if got != c.want {
-			t.Errorf("ApproximateEntropyCheck(%q) == %t, want %t", c.in, got, c.want)
+		if got.result != c.want {
+			t.Errorf("ApproximateEntropyCheck(%q) == %t, want %t", c.in, got.result, c.want)
 		}
 	}
 }
@@ -206,8 +206,8 @@ func TestCumulativeSumsCheck(t *testing.T) {
 	}
 	for _, c := range cases {
 		got := CumulativeSumsCheck(c.in)
-		if got != c.want {
-			t.Errorf("CumulativeSumsCheck(%q) == %t, want %t", c.in, got, c.want)
+		if got.result != c.want {
+			t.Errorf("CumulativeSumsCheck(%q) == %t, want %t", c.in, got.result, c.want)
 		}
 	}
 }
