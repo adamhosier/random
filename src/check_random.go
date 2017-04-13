@@ -11,7 +11,7 @@ import (
 	"fmt"
 )
 
-const SIGNIFICANCE = 0.01
+const significance float64 = 0.01
 
 type testResult struct {
 	name         string
@@ -59,7 +59,7 @@ func FrequencyCheck(bs *BitString) testResult {
 	// Calculate P value
 	p := math.Erfc(s / math.Sqrt2)
 
-	return testResult{"Frequency", p, SIGNIFICANCE, p >= SIGNIFICANCE}
+	return testResult{"Frequency", p, significance, p >= significance}
 }
 
 // Tests the proportion of ones in each block of size [m]
@@ -84,7 +84,7 @@ func BlockFrequencyCheck(bs *BitString, M int) testResult {
 	// find p value using incomplete gamma function
 	p := igamc(float64(numblocks)/2.0, chi/2.0)
 
-	return testResult{fmt.Sprintf("Block Frequency (%d)", M), p, SIGNIFICANCE, p >= SIGNIFICANCE}
+	return testResult{fmt.Sprintf("Block Frequency (%d)", M), p, significance, p >= significance}
 }
 
 // Tests the amount of consecutive ones or zeros over the whole string
@@ -92,7 +92,7 @@ func RunsCheck(bs *BitString) testResult {
 	// Test the proportion of ones to zeros, as this must be valid for runs test to succeed
 	pi := bs.Proportion()
 	if math.Abs(pi-0.5) >= 2.0/math.Sqrt(10) {
-		return testResult{"Consecutive Runs", 0, SIGNIFICANCE, false}
+		return testResult{"Consecutive Runs", 0, significance, false}
 	}
 
 	// Calculate runs test statistic
@@ -109,7 +109,7 @@ func RunsCheck(bs *BitString) testResult {
 	n := float64(bs.length)
 	p := math.Erfc(math.Abs(s-tmp*n) / (tmp * math.Sqrt(2*n)))
 
-	return testResult{"Consecutive Runs", p, SIGNIFICANCE, p >= SIGNIFICANCE}
+	return testResult{"Consecutive Runs", p, significance, p >= significance}
 }
 
 // Tests the longest run of ones in each block of size 8, 128 or 10^4
@@ -118,20 +118,23 @@ func LongestRunCheck(bs *BitString) testResult {
 	// Find parameters for different lengths of [bs]
 	M, k := 0, 0
 	var pi []float64
-	if bs.length == 128 {
+	if bs.length < 128 {
+		return testResult{"Longest Runs", 0, significance, false}
+	} else if bs.length < 6272 {
+		bs = bs.Substring(0, 128)
 		M = 8
 		k = 4
 		pi = []float64{0.2148, 0.3672, 0.2305, 0.1875}
-	} else if bs.length == 6272 {
+	} else if bs.length < 750000 {
+		bs = bs.Substring(0, 6272)
 		M = 128
 		k = 6
 		pi = []float64{0.1174, 0.2430, 0.2493, 0.1752, 0.1027, 0.1124}
-	} else if bs.length == 750000 {
+	} else {
+		bs = bs.Substring(0, 750000)
 		M = 100000
 		k = 7
 		pi = []float64{0.0882, 0.2092, 0.2483, 0.1933, 0.1208, 0.0675, 0.0727}
-	} else {
-		return testResult{"Longest Runs", 0, SIGNIFICANCE, false}
 	}
 	n := bs.length / M
 
@@ -196,7 +199,7 @@ func LongestRunCheck(bs *BitString) testResult {
 	// Calculate p value
 	p := igamc(float64(k-1)/2.0, chi/2.0)
 
-	return testResult{"Longest Runs", p, SIGNIFICANCE, p >= SIGNIFICANCE}
+	return testResult{"Longest Runs", p, significance, p >= significance}
 }
 
 // Tests a [template] BitString against [bs] to find if the template occurs significantly often
@@ -231,7 +234,7 @@ func NonOverlappingTemplateMatchingCheck(bs, template *BitString) testResult {
 	// Compute p value
 	p := igamc(float64(N)/2.0, chi/2.0)
 
-	return testResult{fmt.Sprintf("Non Overlapping Templates (%q)", template), p, SIGNIFICANCE, p >= SIGNIFICANCE}
+	return testResult{fmt.Sprintf("Non Overlapping Templates (%q)", template), p, significance, p >= significance}
 }
 
 // Checks every binary block over a few sizes to ensure they don't occur too commonly
@@ -295,13 +298,13 @@ func SerialCheck(bs *BitString) testResult {
 	p1 := igamc(math.Pow(2.0, float64(m-2)), dpsi1/2.0)
 	p2 := igamc(math.Pow(2.0, float64(m-3)), dpsi2/2.0)
 
-	if !(p1 >= SIGNIFICANCE) {
-		return testResult{"Serial (p1)", p1, SIGNIFICANCE, false}
+	if !(p1 >= significance) {
+		return testResult{"Serial (p1)", p1, significance, false}
 	}
-	if !(p2 >= SIGNIFICANCE) {
-		return testResult{"Serial (p2)", p2, SIGNIFICANCE, false}
+	if !(p2 >= significance) {
+		return testResult{"Serial (p2)", p2, significance, false}
 	}
-	return testResult{"Serial", (p1 + p2) / 2.0, SIGNIFICANCE, true}
+	return testResult{"Serial", (p1 + p2) / 2.0, significance, true}
 }
 
 // Compares all possible bit patterns of a certain length to see if any occur significantly often
@@ -355,7 +358,7 @@ func ApproximateEntropyCheck(bs *BitString) testResult {
 	// Compute p value
 	p := igamc(math.Pow(2.0, float64(m-1)), chi/2.0)
 
-	return testResult{"Approximate Entropy", p, SIGNIFICANCE, p >= SIGNIFICANCE}
+	return testResult{"Approximate Entropy", p, significance, p >= significance}
 }
 
 // Find consecutive partial sums from the start, checking they don't get too high or low
@@ -395,5 +398,5 @@ func CumulativeSumsCheck(bs *BitString) testResult {
 	}
 	p := 1.0 - sum1 + sum2
 
-	return testResult{"Cumulative Sums", p, SIGNIFICANCE, p >= SIGNIFICANCE}
+	return testResult{"Cumulative Sums", p, significance, p >= significance}
 }

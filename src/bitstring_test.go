@@ -99,6 +99,18 @@ func TestBitString_At(t *testing.T) {
 	}
 }
 
+func TestBitString_Add(t *testing.T) {
+	bs, _ := BitStringFromString("01")
+	bs.Add(false)
+	if bs.At(2) {
+		t.Errorf("BitString.Add(0) == 1, expected 0")
+	}
+	bs.Add(true)
+	if !bs.At(3) {
+		t.Errorf("BitString.Add(1) == 0, expected 1")
+	}
+}
+
 func TestBitString_First(t *testing.T) {
 	bs1, _ := BitStringFromString("10010")
 	bs2, _ := BitStringFromString("100")

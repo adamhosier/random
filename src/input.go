@@ -6,31 +6,37 @@ import (
 	"os/exec"
 )
 
-type Input struct {
+type Input interface {
+	GetBits(int) *BitString
+}
+
+type BufferedInput struct {
 	binaryPath string
 	buffer     *[]byte
 }
 
 // Builds a new input type relating to the binary at path [binPath]
-func NewInput(binPath string) (*Input, error) {
+func NewBufferedInput(binPath string) (*BufferedInput, error) {
 	// check file exists
 	if _, err := os.Stat(binPath); err == nil {
-		return &Input{binPath, &[]byte{}}, nil
+		return &BufferedInput{binPath, &[]byte{}}, nil
 	} else {
 		return nil, fmt.Errorf("input: file not found '%x'\n", binPath)
 	}
 }
 
 // Fetches n bits from the buffer. If the buffer is empty, fetch a new batch of bits first
-func (i *Input) GetBits(n int) *BitString {
+func (i *BufferedInput) GetBits(n int) *BitString {
 	if n <= 0 {
 		return nil
 	}
+
+	// collect bits until we have enough
 	for len(*i.buffer) < n {
 		// run binary, then collect it's stdout to the buffer
 		output, _ := exec.Command(i.binaryPath).Output()
-		newbuffer := append(*i.buffer, output...)
-		i.buffer = &newbuffer
+		newBuffer := append(*i.buffer, output...)
+		i.buffer = &newBuffer
 	}
 
 	// round up n bits to closest byte boundary

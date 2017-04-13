@@ -62,6 +62,12 @@ func (bs *BitString) At(i int) bool {
 	return bs.data[i]
 }
 
+// Adds a value [b] to the end of this [bs]
+func (bs *BitString) Add(b bool) {
+	bs.length++
+	bs.data = append(bs.data, b)
+}
+
 // Gets the first [n] bits from [bs]
 func (bs *BitString) First(n int) *BitString {
 	d := make([]bool, n)
@@ -115,6 +121,18 @@ func (bs *BitString) HasTemplateAt(template *BitString, i int) bool {
 	}
 	return true
 }
+
+// Returns an int holding the inner product of this BitString and another
+func (bs *BitString) InnerProduct(other *BitString) int {
+	res := 0
+	for i := 0; i < int(math.Min(float64(bs.length), float64(other.length))); i++ {
+		if bs.At(i) && other.At(i) {
+			res++
+		}
+	}
+	return res
+}
+
 
 // Converts [bs] to a string of zeros and ones
 func (bs *BitString) String() string {

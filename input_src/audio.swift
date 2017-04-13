@@ -37,7 +37,8 @@ class Audio : NSObject, AVAudioRecorderDelegate {
         recorder.stop()
         do {
             let content = try String(contentsOf: url, encoding: String.Encoding.ascii)
-            return content
+            let index = content.index(content.startIndex, offsetBy: 57500)
+            return content.substring(from: index)
         } catch let e {
             fatalError(e.localizedDescription)
         }
