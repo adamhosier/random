@@ -7,8 +7,8 @@
 package random
 
 import (
-	"math"
 	"fmt"
+	"math"
 )
 
 const significance float64 = 0.01
@@ -28,7 +28,7 @@ func CheckRandom(bs *BitString) (bool, []testResult) {
 	t3, _ := BitStringFromString("000111")
 
 	// Run all tests
-	results := []testResult{FrequencyCheck(bs), BlockFrequencyCheck(bs, bs.length / 10), RunsCheck(bs),
+	results := []testResult{FrequencyCheck(bs), BlockFrequencyCheck(bs, bs.length/10), RunsCheck(bs),
 		LongestRunCheck(bs), NonOverlappingTemplateMatchingCheck(bs, t1), NonOverlappingTemplateMatchingCheck(bs, t2),
 		NonOverlappingTemplateMatchingCheck(bs, t3), SerialCheck(bs), ApproximateEntropyCheck(bs),
 		CumulativeSumsCheck(bs)}

@@ -13,7 +13,7 @@ func TestNewInput(t *testing.T) {
 		{path: "../input_bin/not_here", wantError: true},
 	}
 	for _, c := range cases {
-		_, err := NewBufferedInput(c.path)
+		_, err := NewInput(c.path)
 		if err == nil {
 			if c.wantError {
 				t.Errorf("NewInput(\"%v\") expected an error to be thrown", c.path)
@@ -31,7 +31,7 @@ func TestGetBits(t *testing.T) {
 		{path: "../input_bin/webcam", wantError: false},
 	}
 	for _, c := range cases {
-		i, _ := NewBufferedInput(c.path)
+		i, _ := NewInput(c.path)
 		bs := i.GetBits(100)
 		if bs.length != 100 {
 			t.Error("GetBits() retreived the wrong amount of bits")

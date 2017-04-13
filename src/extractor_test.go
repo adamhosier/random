@@ -22,7 +22,7 @@ func TestInnerProductExtractor(t *testing.T) {
 	i2 := &MockInput{
 		MockGetBits: func(n int) *BitString {
 			bs, _ := BitStringFromString("0000000000000000000000000000000000000000000000000000000000000000")
-			return bs.Substring(0, n);
+			return bs.Substring(0, n)
 		},
 	}
 

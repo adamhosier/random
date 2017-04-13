@@ -133,7 +133,6 @@ func (bs *BitString) InnerProduct(other *BitString) int {
 	return res
 }
 
-
 // Converts [bs] to a string of zeros and ones
 func (bs *BitString) String() string {
 	var s string

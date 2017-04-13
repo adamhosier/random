@@ -1,12 +1,12 @@
 package random
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestSystem(t *testing.T) {
-	webcamInput, _ := NewBufferedInput("../input_bin/webcam")
+	webcamInput, _ := NewInput("../input_bin/webcam")
 	webcamBits := webcamInput.GetBits(1000)
 	webcamPassed, webcamResults := CheckRandom(webcamBits)
 	fmt.Printf("WEBCAM INPUT\n---------------\nBitString: %q\n", webcamBits)
@@ -23,7 +23,7 @@ func TestSystem(t *testing.T) {
 
 	fmt.Println()
 
-	audioInput, _ := NewBufferedInput("../input_bin/audio")
+	audioInput, _ := NewInput("../input_bin/audio")
 	audioBits := audioInput.GetBits(1000)
 	audioPassed, audioResults := CheckRandom(audioBits)
 	fmt.Printf("AUDIO INPUT\n---------------\nBitString: %q\n", audioBits)
