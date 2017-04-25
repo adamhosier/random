@@ -54,4 +54,6 @@ func TestSystem(t *testing.T) {
 			}
 		}
 	}
+
+	// TODO: use output from inner product extractor to feed random walk extractor
 }
