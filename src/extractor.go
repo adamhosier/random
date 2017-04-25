@@ -47,33 +47,40 @@ func NewRandomWalkExtractor(i1, i2 Extractable) *RandomWalkExtractor {
     return &RandomWalkExtractor{i1, i2, 32}
 }
 
+// This function used to generate the entire random graph, then randomly traverse it. Below is an implementation of
+// an optimised function, that lazily generates graph nodes as they are needed for a huge performance improvement.
 func (e *RandomWalkExtractor) GetBits(n int) *BitString {
-	// Get all possible outputs
-	bss := BitStringsOfLength(n)
-
-	// Build a random graph
-	gns := make([]randomGraphNode, len(bss))
-	for i, bs := range bss {
-		gns[i] = randomGraphNode{bs, make([]*randomGraphNode, e.d)}
-	}
-
-	// Connect graph using weak input
-	for _, gn := range gns {
-		for j := 0; j < e.d; j++ {
-			gn.neighbours[j] = &gns[e.input1.GetBits(int(math.Log2(float64(len(gns))))).Int()]
-		}
-	}
-
-	// Find start node from weak input
-	start := &gns[e.input1.GetBits(n).Int()]
+	// Cache of already constructed nodes, initially empty
+	numNodes := int(math.Pow(2.0, float64(n)))
+	gns := make([]randomGraphNode, numNodes)
 
 	// Calculate number of steps to reach a random point
 	steps := 10 * int(math.Log2(float64(n)))
 
-	// Randomly walk based on the strong input
-	var current *randomGraphNode = start
+	// Get start node from weak input
+	start := e.input1.GetBits(n)
+
+	// Lazily traverse tree
+	var current *randomGraphNode = &gns[start.Int()]
 	for i := 0; i < steps; i++ {
-		current = current.neighbours[e.input2.GetBits(int(math.Log2(float64(e.d)))).Int()]
+		// Lazily construct a (weak) random graph around the selected node if it hasn't been visited yet
+		if current.value == nil {
+			// Get bits from weak input
+			bits := e.input1.GetBits(n)
+			current = &gns[bits.Int()]
+			current.value = bits
+
+			// Set neighbours of new node
+			current.neighbours = make([]*randomGraphNode, e.d)
+			for j := 0; j < e.d; j++ {
+				n := e.input1.GetBits(int(math.Log2(float64(numNodes)))).Int()
+				current.neighbours[j] = &gns[n]
+			}
+		}
+
+		// Select one of these neighbours using the strong generator
+		n = e.input2.GetBits(int(math.Log2(float64(e.d)))).Int()
+		current = current.neighbours[n]
 	}
 
 	return current.value
