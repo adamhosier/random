@@ -65,8 +65,8 @@ func main() {
 	fmt.Println()
 
 	randomOrgInput, err := random.NewInput("input_bin/randomorg")
-	randomWalkExtractor := random.NewRandomWalkExtractor(innerProdExtractor, randomOrgInput)
-	randomWalkBits := randomWalkExtractor.GetBits(32)
+	randomWalkExtractor := random.NewRandomWalkExtractor(audioInput, randomOrgInput)
+	randomWalkBits := randomWalkExtractor.GetBits(128)
 	randomWalkPassed, randomWalkResults := random.CheckRandom(randomWalkBits)
 	fmt.Printf("RANDOM WALK EXTRACTOR\n--------------------------\nBitString: %q\n", randomWalkBits)
 	if !randomWalkPassed {

@@ -31,8 +31,6 @@ func TestGetBits(t *testing.T) {
 		{path: "../input_bin/webcam", wantError: false},
 	}
 
-
-
 	for _, c := range cases {
 		i, _ := NewInput(c.path)
 		bs := i.GetBits(100)

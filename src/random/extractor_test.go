@@ -53,8 +53,8 @@ func TestInnerProductExtractor(t *testing.T) {
 
 func TestRandomWalkExtractor(t *testing.T) {
 	extr := NewRandomWalkExtractor(i1, i3)
-	want, _ := bitstring.BitStringFromString("1000000000000000")
-	got := extr.GetBits(16)
+	want, _ := bitstring.BitStringFromString("1000000000000000000000000000000000000000000000000000000000000000")
+	got := extr.GetBits(64)
 	if !got.Equals(want) {
 		t.Errorf("RandomWalkExtractor.GetBits(16) == %q, expected %q", got, want)
 	}

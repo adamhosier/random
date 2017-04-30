@@ -248,3 +248,27 @@ func TestBitString_Int(t *testing.T) {
 		t.Errorf("BitString.Int %q == %d, want %d", bs, got, want)
 	}
 }
+
+func TestBitString_Compare(t *testing.T) {
+	bs1, _ := BitStringFromString("0001")
+	bs2, _ := BitStringFromString("00001")
+	bs3, _ := BitStringFromString("010100")
+
+	want := 0
+	got := bs1.Compare(bs2)
+	if got != want {
+		t.Errorf("BitString.Compare(%q, %q) == %d, want %d", bs1, bs2, got, want)
+	}
+
+	want = 1
+	got = bs3.Compare(bs1)
+	if got != want {
+		t.Errorf("BitString.Compare(%q, %q) == %d, want %d", bs3, bs1, got, want)
+	}
+
+	want = -1
+	got = bs2.Compare(bs3)
+	if got != want {
+		t.Errorf("BitString.Compare(%q, %q) == %d, want %d", bs2, bs3, got, want)
+	}
+}

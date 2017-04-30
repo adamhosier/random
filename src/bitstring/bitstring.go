@@ -3,6 +3,9 @@ package bitstring
 import (
 	"fmt"
 	"math"
+	"strconv"
+	"crypto/sha1"
+	"encoding/hex"
 )
 
 type BitString struct {
@@ -89,9 +92,23 @@ func (bs *BitString) Extend(bs1 *BitString) *BitString {
 
 // Partitions [bs] into blocks of length [len] discarding extra bits at the end
 func (bs *BitString) Partition(len int) []*BitString {
-	bss := make([]*BitString, bs.Length /len)
-	for i := 0; i < bs.Length /len; i++ {
+	bss := make([]*BitString, bs.Length / len)
+	for i := 0; i < bs.Length / len; i++ {
 		bss[i] = &BitString{len, bs.Data[i*len : (i+1)*len]}
+	}
+	return bss
+}
+
+// Partitions [bs] into blocks of length [len] keeping extra bits at the end
+func (bs *BitString) PartitionExtra(len int) []*BitString {
+	bss := make([]*BitString, int(math.Ceil(float64(bs.Length) / float64(len))))
+	var i int
+	for i = 0; i < bs.Length / len; i++ {
+		bss[i] = &BitString{len, bs.Data[i*len : (i+1)*len]}
+	}
+	rem := bs.Length % len
+	if rem != 0 {
+		bss[i] = &BitString{rem, bs.Data[i*len : i*len + rem]}
 	}
 	return bss
 }
@@ -168,4 +185,59 @@ func (bs *BitString) Equals(other *BitString) bool {
 		}
 	}
 	return true
+}
+
+// Implement comparable interface
+func (bs *BitString) Compare(other *BitString) int {
+	// Compare as integers by partitioning strings
+	p1 := bs.PartitionExtra(64)
+	p2 := other.PartitionExtra(64)
+	diff := len(p1) - len(p2)
+
+	// If [bs] and [other] are of different lengths, compare the extra bits first
+	if diff > 0 {
+		// When [bs] is significantly longer
+		for i := 0; i < diff; i++ {
+			if p1[i].Int() > 0 {
+				return 1
+			}
+		}
+		p1 = p1[diff:]
+	} else if diff < 0 {
+		// When [other] is significantly longer
+		for i := 0; i < -diff; i++ {
+			if p2[i].Int() > 0 {
+				return 1
+			}
+		}
+		p2 = p2[-diff:]
+	}
+
+	// Compare the rest of the bits, which should be of equal length
+	for i := 0; i < len(p1); i++ {
+		p1i := p1[i].Int()
+		p2i := p2[i].Int()
+		if p1i > p2i {
+			return 1
+		}
+		if p2i > p1i {
+			return -1
+		}
+	}
+
+	// If we get here, they're equal
+	return 0
+}
+
+// Hashes the bitstring, the hash being the md5 of the integer parts of the value
+func (bs *BitString) Hash() string {
+	var s string
+	// Partition into ints
+	data := bs.PartitionExtra(64)
+	for _, datum := range data {
+		s += strconv.Itoa(datum.Int())
+	}
+	hasher := sha1.New()
+	hasher.Write([]byte(s))
+	return hex.EncodeToString(hasher.Sum(nil))
 }

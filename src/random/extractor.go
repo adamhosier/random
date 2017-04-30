@@ -54,36 +54,36 @@ func NewRandomWalkExtractor(i1, i2 Extractable) *RandomWalkExtractor {
 // an optimised function, that lazily generates graph nodes as they are needed for a huge performance improvement.
 func (e *RandomWalkExtractor) GetBits(n int) *bitstring.BitString {
 	// Cache of already constructed nodes, initially empty
-	numNodes := int(math.Pow(2.0, float64(n)))
-	gns := make([]randomGraphNode, numNodes)
+	gns := make(map[string]randomGraphNode)
 
 	// Calculate number of steps to reach a random point
 	steps := 10 * int(math.Log2(float64(n)))
 
 	// Get start node from weak input
-	start := e.input1.GetBits(n)
+	startBits := e.input1.GetBits(n)
+	gns[startBits.Hash()] = randomGraphNode{startBits, make([]*randomGraphNode, e.d)}
 
 	// Lazily traverse tree
-	var current *randomGraphNode = &gns[start.Int()]
+	current := gns[startBits.Hash()]
 	for i := 0; i < steps; i++ {
 		// Lazily construct a (weak) random graph around the selected node if it hasn't been visited yet
-		if current.value == nil {
-			// Get bits from weak input
-			bits := e.input1.GetBits(n)
-			current = &gns[bits.Int()]
-			current.value = bits
-
-			// Set neighbours of new node
-			current.neighbours = make([]*randomGraphNode, e.d)
+		if current.neighbours[0] == nil {
 			for j := 0; j < e.d; j++ {
-				n := e.input1.GetBits(int(math.Log2(float64(numNodes)))).Int()
-				current.neighbours[j] = &gns[n]
+				// Get bits from weak input
+				bits := e.input1.GetBits(n)
+
+				// If this node hasn't been visited, add it to the graph then set it as a neighbour
+				if _, exists := gns[bits.Hash()]; !exists {
+					gns[bits.Hash()] = randomGraphNode{startBits, make([]*randomGraphNode, e.d)}
+				}
+				node := gns[bits.Hash()]
+				current.neighbours[j] = &node
 			}
 		}
 
 		// Select one of these neighbours using the strong generator
 		n = e.input2.GetBits(int(math.Log2(float64(e.d)))).Int()
-		current = current.neighbours[n]
+		current = *current.neighbours[n]
 	}
 
 	return current.value
