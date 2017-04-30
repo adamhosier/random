@@ -2,6 +2,7 @@ package random
 
 import (
 	"math"
+	"github.com/adamhosier/random/src/bitstring"
 )
 
 const (
@@ -94,3 +95,41 @@ func igamc(a, x float64) float64 {
 func stdNormal(x float64) float64 {
 	return 0.5 * (math.Erfc(-x / math.Sqrt2))
 }
+
+
+// Mock input structure for testing
+type MockInput struct {
+	MockGetBits func(int) *bitstring.BitString
+}
+
+func (i *MockInput) GetBits(n int) *bitstring.BitString {
+	return i.MockGetBits(n)
+}
+
+var (
+	i1 = &MockInput{
+		MockGetBits: func(n int) *bitstring.BitString {
+			bs, _ := bitstring.BitStringFromString("1000000000000000000000000000000000000000000000000000000000000000")
+			return bs.Substring(0, n)
+		},
+	}
+	i2 = &MockInput{
+		MockGetBits: func(n int) *bitstring.BitString {
+			bs, _ := bitstring.BitStringFromString("0000000000000000000000000000000000000000000000000000000000000000")
+			return bs.Substring(0, n)
+		},
+	}
+	i3 = &MockInput{
+		MockGetBits: func(n int) *bitstring.BitString {
+			bs, _ := bitstring.BitStringFromString("00000000")
+			return bs.Substring(0, n)
+		},
+	}
+	i4 = &MockInput{
+		MockGetBits: func(n int) *bitstring.BitString {
+			bs, _ := bitstring.BitStringFromString("0111111101111111001101011011101001101110011100101100")
+			return bs.Substring(0, n)
+		},
+	}
+)
+
