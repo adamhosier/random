@@ -47,7 +47,7 @@ type randomGraphNode struct {
 }
 
 func NewRandomWalkExtractor(i1, i2 Extractable) *RandomWalkExtractor {
-	return &RandomWalkExtractor{i1, i2, 32}
+	return &RandomWalkExtractor{i1, i2, 8}
 }
 
 // This function used to generate the entire random graph, then randomly traverse it. Below is an implementation of
@@ -82,8 +82,8 @@ func (e *RandomWalkExtractor) GetBits(n int) *bitstring.BitString {
 		}
 
 		// Select one of these neighbours using the strong generator
-		n = e.input2.GetBits(int(math.Log2(float64(e.d)))).Int()
-		current = *current.neighbours[n]
+		next := e.input2.GetBits(int(math.Log2(float64(e.d)))).Int()
+		current = *current.neighbours[next]
 	}
 
 	return current.value

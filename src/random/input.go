@@ -25,7 +25,7 @@ func NewInput(binPath string) (*Input, error) {
 // Fetches n bits from the buffer. If the buffer is empty, fetch a new batch of bits first
 func (i *Input) GetBits(n int) *bitstring.BitString {
 	if n <= 0 {
-		return nil
+		panic("Input.GetBits(n) requires n > 0")
 	}
 
 	// collect bits until we have enough
