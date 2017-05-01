@@ -11,6 +11,13 @@ type bitStringTest struct {
 	want      BitString
 }
 
+func TestNewBitString(t *testing.T) {
+	bs := NewBitString()
+	if bs.Length != 0 {
+		t.Error("NewBitString has non-zero length")
+	}
+}
+
 func TestBitStringFromString(t *testing.T) {
 	cases := []bitStringTest{
 		{strInput: "00101101001", wantError: false},
@@ -50,6 +57,20 @@ func TestBitStringFromBytes(t *testing.T) {
 				t.Errorf("BitStringFromUTF8(\"%v\") threw an error which wasnt expected", c.strInput)
 			}
 		}
+	}
+}
+
+func TestBitStringFromInt(t *testing.T) {
+	got := BitStringFromInt(3, 5)
+	want, _ := BitStringFromString("101")
+	if !got.Equals(want) {
+		t.Errorf("BitStringFromInt(3, 5) == %q, want %q", got, want)
+	}
+
+	got = BitStringFromInt(20, 1023)
+	want, _ = BitStringFromString("00000000001111111111")
+	if !got.Equals(want) {
+		t.Errorf("BitStringFromInt(20, 1023) == %q, want %q", got, want)
 	}
 }
 

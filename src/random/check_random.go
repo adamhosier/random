@@ -8,8 +8,8 @@ package random
 
 import (
 	"fmt"
-	"math"
 	"github.com/adamhosier/random/src/bitstring"
+	"math"
 )
 
 const significance float64 = 0.01

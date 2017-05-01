@@ -21,10 +21,10 @@ func (g *Generator) NextFloat64() float64 {
 	fraction := 1.0
 	for i, b := range g.e.GetBits(52).Data {
 		if b {
-			fraction += math.Pow(2, float64(-(i+1)))
+			fraction += math.Pow(2, float64(-(i + 1)))
 		}
 	}
-	exponent := math.Pow(2, float64(g.next(11) - 1023))
+	exponent := math.Pow(2, float64(g.next(11)-1023))
 	return math.Pow(-1, float64(sign)) * fraction * exponent
 }
 

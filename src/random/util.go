@@ -1,8 +1,8 @@
 package random
 
 import (
-	"math"
 	"github.com/adamhosier/random/src/bitstring"
+	"math"
 )
 
 const (
@@ -96,7 +96,6 @@ func stdNormal(x float64) float64 {
 	return 0.5 * (math.Erfc(-x / math.Sqrt2))
 }
 
-
 // Mock input structure for testing
 type MockInput struct {
 	MockGetBits func(int) *bitstring.BitString
@@ -132,4 +131,3 @@ var (
 		},
 	}
 )
-

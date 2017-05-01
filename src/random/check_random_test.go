@@ -1,9 +1,9 @@
 package random
 
 import (
+	"github.com/adamhosier/random/src/bitstring"
 	"os"
 	"testing"
-	"github.com/adamhosier/random/src/bitstring"
 )
 
 type randomTest struct {

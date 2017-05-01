@@ -1,8 +1,9 @@
 package random
 
 import (
-	"math"
 	"github.com/adamhosier/random/src/bitstring"
+	"math"
+	"math/rand"
 )
 
 type Extractable interface {
@@ -33,8 +34,7 @@ func (e *InnerProductExtractor) GetBits(n int) *bitstring.BitString {
 	return bs
 }
 
-
-
+// Random walk extractor
 type RandomWalkExtractor struct {
 	input1 Extractable // Fast, weak random input
 	input2 Extractable // Slow, strong random input
@@ -47,7 +47,7 @@ type randomGraphNode struct {
 }
 
 func NewRandomWalkExtractor(i1, i2 Extractable) *RandomWalkExtractor {
-    return &RandomWalkExtractor{i1, i2, 32}
+	return &RandomWalkExtractor{i1, i2, 32}
 }
 
 // This function used to generate the entire random graph, then randomly traverse it. Below is an implementation of
@@ -87,4 +87,33 @@ func (e *RandomWalkExtractor) GetBits(n int) *bitstring.BitString {
 	}
 
 	return current.value
+}
+
+// Pseudo-random extractor (used for PRNG)
+type PseudoRandomExtractor struct {
+	seed int
+}
+
+func NewPseudoRandomExtractor(seed int) *PseudoRandomExtractor {
+	return &PseudoRandomExtractor{(seed ^ 0x5DEECE66D) & (1<<48 - 1)}
+}
+
+func (e *PseudoRandomExtractor) GetBits(n int) *bitstring.BitString {
+	// The linear congruential prng gets up to 32 bits at a time
+	result := bitstring.NewBitString()
+	for i := 0; i < n; i += 32 {
+		numBits := int(math.Min(float64(32), float64(n-i)))
+
+		// update seed
+		e.seed = (e.seed*0x5DEECE66D + 0xB) & ((1 << 48) - 1)
+
+		// return next value in the sequence
+		b := e.seed >> uint(48-numBits)
+		rand.Int()
+
+		// Add these bits to our result
+		result = result.Extend(bitstring.BitStringFromInt(numBits, b))
+	}
+
+	return result
 }

@@ -9,8 +9,8 @@ type inputTest struct {
 
 func TestNewInput(t *testing.T) {
 	cases := []inputTest{
-		{path: "../input_bin/webcam", wantError: false},
-		{path: "../input_bin/not_here", wantError: true},
+		{path: "../../input_bin/webcam", wantError: false},
+		{path: "../../input_bin/not_here", wantError: true},
 	}
 	for _, c := range cases {
 		_, err := NewInput(c.path)
@@ -28,7 +28,7 @@ func TestNewInput(t *testing.T) {
 
 func TestGetBits(t *testing.T) {
 	cases := []inputTest{
-		{path: "../input_bin/webcam", wantError: false},
+		{path: "../../input_bin/webcam", wantError: false},
 	}
 
 	for _, c := range cases {

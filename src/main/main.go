@@ -79,4 +79,22 @@ func main() {
 			}
 		}
 	}
+
+	fmt.Println()
+
+	prng := random.NewPseudoRandomExtractor(randomOrgInput.GetBits(64).Int())
+	prngBits := prng.GetBits(1000)
+	prngPassed, prngResults := random.CheckRandom(prngBits)
+	fmt.Printf("PSEUDO-RANDOM EXTRACTOR\n--------------------------\nBitString: %q\n", prngBits)
+	if !prngPassed {
+		for _, res := range prngResults {
+			fmt.Printf("Test \"%s\"\n", res.Name)
+			if res.Result {
+				fmt.Println("\tPASSED")
+			} else {
+				fmt.Printf("\tFAILED (p = %g at %f significance)\n", res.P, res.Significance)
+			}
+		}
+	}
+
 }

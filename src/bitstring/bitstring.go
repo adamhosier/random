@@ -1,16 +1,20 @@
 package bitstring
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"math"
 	"strconv"
-	"crypto/sha1"
-	"encoding/hex"
 )
 
 type BitString struct {
 	Length int
 	Data   []bool
+}
+
+func NewBitString() *BitString {
+	return &BitString{0, make([]bool, 0)}
 }
 
 // Builds a BitString from a string of zeros and ones e.g. "01101001"
@@ -40,6 +44,15 @@ func BitStringFromBytes(bytes *[]byte) (*BitString, error) {
 		}
 	}
 	return &BitString{n, bs}, nil
+}
+
+// Builds a BitString from [n] bits of the int [num], where n < 64
+func BitStringFromInt(n, num int) *BitString {
+	data := make([]bool, n)
+	for i := uint(0); i < uint(n); i++ {
+		data[uint(n)-i-1] = (num>>i)&1 == 1
+	}
+	return &BitString{n, data}
 }
 
 // Gets a slice of all possible bit strings of length [n] (000, 001, 010, ... for n=3)
@@ -92,8 +105,8 @@ func (bs *BitString) Extend(bs1 *BitString) *BitString {
 
 // Partitions [bs] into blocks of length [len] discarding extra bits at the end
 func (bs *BitString) Partition(len int) []*BitString {
-	bss := make([]*BitString, bs.Length / len)
-	for i := 0; i < bs.Length / len; i++ {
+	bss := make([]*BitString, bs.Length/len)
+	for i := 0; i < bs.Length/len; i++ {
 		bss[i] = &BitString{len, bs.Data[i*len : (i+1)*len]}
 	}
 	return bss
@@ -101,14 +114,14 @@ func (bs *BitString) Partition(len int) []*BitString {
 
 // Partitions [bs] into blocks of length [len] keeping extra bits at the end
 func (bs *BitString) PartitionExtra(len int) []*BitString {
-	bss := make([]*BitString, int(math.Ceil(float64(bs.Length) / float64(len))))
+	bss := make([]*BitString, int(math.Ceil(float64(bs.Length)/float64(len))))
 	var i int
-	for i = 0; i < bs.Length / len; i++ {
+	for i = 0; i < bs.Length/len; i++ {
 		bss[i] = &BitString{len, bs.Data[i*len : (i+1)*len]}
 	}
 	rem := bs.Length % len
 	if rem != 0 {
-		bss[i] = &BitString{rem, bs.Data[i*len : i*len + rem]}
+		bss[i] = &BitString{rem, bs.Data[i*len : i*len+rem]}
 	}
 	return bss
 }
@@ -168,7 +181,7 @@ func (bs *BitString) Int() int {
 	var n int
 	for i, b := range bs.Data {
 		if b {
-			n |= 0x1 << uint64(bs.Length -i-1)
+			n |= 0x1 << uint64(bs.Length-i-1)
 		}
 	}
 	return n

@@ -2,9 +2,9 @@ package random
 
 import (
 	"fmt"
+	"github.com/adamhosier/random/src/bitstring"
 	"os"
 	"os/exec"
-	"github.com/adamhosier/random/src/bitstring"
 )
 
 type Input struct {
