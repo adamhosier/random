@@ -13,12 +13,12 @@ type Input struct {
 }
 
 // Builds a new input type relating to the binary at path [binPath]
-func NewInput(binPath string) (*Input, error) {
+func NewInput(binPath string) *Input {
 	// check file exists
 	if _, err := os.Stat(binPath); err == nil {
-		return &Input{binPath, &[]byte{}}, nil
+		return &Input{binPath, &[]byte{}}
 	} else {
-		return nil, fmt.Errorf("input: file not found '%x'\n", binPath)
+		panic(fmt.Sprintf("Input: file not found '%s'\n", binPath))
 	}
 }
 

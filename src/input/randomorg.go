@@ -11,16 +11,16 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
-	"fmt"
 )
 
 type Request struct {
-	JsonRPC string          `json:"jsonrpc"`
-	Method  string          `json:"method"`
-	Params  *RequestParams  `json:"params"`
-	Id int                  `json:"id"`
+	JsonRPC string         `json:"jsonrpc"`
+	Method  string         `json:"method"`
+	Params  *RequestParams `json:"params"`
+	Id      int            `json:"id"`
 }
 
 type RequestParams struct {
@@ -71,5 +71,5 @@ func main() {
 
 	// Collect result
 	result := data.Result.Random.Data[0]
-	fmt.Println(result[:len(result) - 1])
+	fmt.Println(result[:len(result)-1])
 }

@@ -1,12 +1,70 @@
 package random
 
-import "math"
+import (
+	"encoding/json"
+	"fmt"
+	"math"
+	"os"
+)
+
+// Generator config structure
+type GeneratorConfig struct {
+	Extractor *ExtractableConfig `json:"extractor"`
+}
+
+type ExtractableConfig struct {
+	Type          string             `json:"type"`
+	Seed          int                `json:"seed"`
+	SeedGenerator *ExtractableConfig `json:"seedGenerator"`
+	Path          string             `json:"path"`
+	Input1        *ExtractableConfig `json:"input1"`
+	Input2        *ExtractableConfig `json:"input2"`
+}
 
 type Generator struct {
 	e Extractable
 }
 
-func NewGenerator(e Extractable) *Generator {
+// Creates a random number genertor using the configuration defined in 'default.json'
+func NewGenerator() *Generator {
+	return NewGeneratorFromConfig("default")
+}
+
+// Creates a random number generator using the configuration defined at [path]
+func NewGeneratorFromConfig(name string) *Generator {
+	// Read config file
+	file, err := os.Open(fmt.Sprintf("../../config/%s.json", name))
+	if err != nil {
+		panic("NewGenerator: Could not load config file")
+	}
+	var config GeneratorConfig
+	json.NewDecoder(file).Decode(&config)
+
+	// Build the generator from the config
+	return NewGeneratorFromExtractable(configureExtractable(*config.Extractor))
+}
+
+func configureExtractable(config ExtractableConfig) Extractable {
+	switch config.Type {
+	case "pseudorandom":
+		if config.SeedGenerator != nil {
+			return NewPseudoRandomExtractor(configureExtractable(*config.SeedGenerator).GetBits(64).Int())
+		} else {
+			return NewPseudoRandomExtractor(config.Seed)
+		}
+	case "input":
+		return NewInput(fmt.Sprintf("../../%s", config.Path))
+	case "innerproduct":
+		return NewInnerProductExtractor(configureExtractable(*config.Input1), configureExtractable(*config.Input2))
+	case "randomwalk":
+		return NewRandomWalkExtractor(configureExtractable(*config.Input1), configureExtractable(*config.Input2))
+	default:
+		panic("NewGenerator: Invalid generator config (extractable object)")
+	}
+}
+
+// Creates a random number generator using a user defined configuration
+func NewGeneratorFromExtractable(e Extractable) *Generator {
 	return &Generator{e}
 }
 

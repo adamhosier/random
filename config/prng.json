@@ -1,0 +1,9 @@
+{
+  "extractor": {
+    "type": "pseudorandom",
+    "seedGenerator": {
+      "type": "input",
+      "path": "input_bin/randomorg"
+    }
+  }
+}

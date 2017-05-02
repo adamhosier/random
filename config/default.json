@@ -1,0 +1,6 @@
+{
+  "extractor": {
+    "type": "pseudorandom",
+    "seed": 0
+  }
+}
