@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"runtime"
+	"path"
 )
 
 // Generator config structure
@@ -32,8 +34,12 @@ func NewGenerator() *Generator {
 
 // Creates a random number generator using the configuration defined at [path]
 func NewGeneratorFromConfig(name string) *Generator {
+	// Allow config to be read cross-package
+	_, thisfile, _, _ := runtime.Caller(0)
+	filepath := fmt.Sprintf("%s/config/%s.json", path.Dir(thisfile), name)
+
 	// Read config file
-	file, err := os.Open(fmt.Sprintf("../../config/%s.json", name))
+	file, err := os.Open(filepath)
 	if err != nil {
 		panic("NewGenerator: Could not load config file")
 	}
@@ -53,7 +59,8 @@ func configureExtractable(config ExtractableConfig) Extractable {
 			return NewPseudoRandomExtractor(config.Seed)
 		}
 	case "input":
-		return NewInput(fmt.Sprintf("../../%s", config.Path))
+		_, thisfile, _, _ := runtime.Caller(0)
+		return NewInput(fmt.Sprintf("%s/%s", path.Dir(path.Dir(path.Dir(thisfile))), config.Path))
 	case "innerproduct":
 		return NewInnerProductExtractor(configureExtractable(*config.Input1), configureExtractable(*config.Input2))
 	case "randomwalk":
