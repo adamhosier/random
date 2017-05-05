@@ -98,6 +98,15 @@ func (g *Generator) NextInt() int {
 	return g.next(64)
 }
 
+func (g *Generator) NextIntBetween(start, end int) int {
+	if end <= start {
+		panic("Generator.NextIntBetween(start, end): Start must be less than end")
+	}
+	r := end - start
+	bitsNeeded := int(math.Ceil(math.Log2(float64(r))))
+	return (g.next(bitsNeeded) % r) + start
+}
+
 // Gets an integer consisting of n bits of randomness, with n < 64
 func (g *Generator) next(n int) int {
 	return g.e.GetBits(n).Int()

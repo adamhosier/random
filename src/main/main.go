@@ -5,10 +5,15 @@ import (
 )
 
 func main() {
-	r := random.NewGeneratorFromConfig("example")
-	data := make([]int, 5000)
-	for i := 0; i < 5000; i++ {
-		data[i] = r.NextInt()
+	r := random.NewGeneratorFromConfig("prng")
+	max := 10
+	data := make([]int, max)
+	for i := 0; i < 10000; i++ {
+		n := r.NextIntBetween(0, max)
+		data[n]++
+	}
+	for i := 0; i < max; i++ {
+		println(data[i])
 	}
 }
 
