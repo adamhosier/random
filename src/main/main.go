@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/adamhosier/random/src/random"
+	"fmt"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 		data[n]++
 	}
 	for i := 0; i < max; i++ {
-		println(data[i])
+		fmt.Printf("%d: %d\n", i, data[i])
 	}
 }
 

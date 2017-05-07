@@ -98,13 +98,18 @@ func (g *Generator) NextInt() int {
 	return g.next(64)
 }
 
+// Gets an integer in the uniform range [start, end)
 func (g *Generator) NextIntBetween(start, end int) int {
 	if end <= start {
 		panic("Generator.NextIntBetween(start, end): Start must be less than end")
 	}
 	r := end - start
 	bitsNeeded := int(math.Ceil(math.Log2(float64(r))))
-	return (g.next(bitsNeeded) % r) + start
+	n := math.MaxInt64
+	for n >= r {
+		n = g.next(bitsNeeded)
+	}
+	return n + start
 }
 
 // Gets an integer consisting of n bits of randomness, with n < 64
