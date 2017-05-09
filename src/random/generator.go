@@ -98,6 +98,17 @@ func (g *Generator) NextInt() int {
 	return g.next(64)
 }
 
+// Gets a 64 bit float between 0 and 1 includive
+func (g *Generator) NextNormalizedFloat() float64 {
+	fraction := 1.0
+	for i, b := range g.e.GetBits(52).Data {
+		if b {
+			fraction -= math.Pow(2, float64(-(i + 1)))
+		}
+	}
+	return fraction
+}
+
 // Gets an integer in the uniform range [start, end)
 func (g *Generator) NextIntBetween(start, end int) int {
 	if end <= start {
