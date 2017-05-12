@@ -1,46 +1,51 @@
 package main
 
-import "github.com/adamhosier/random/src/random"
+import (
+	"github.com/adamhosier/random/src/random"
+	"github.com/adamhosier/random/src/bitstring"
+)
 
-type Message struct {
-	name string
-	value byte
-}
-
+const (
+	defaultBitCorruptionRate = 0.1 // Rate at which bits are flipped when sending over a lossy link [0..1]
+)
 // Perfect p2p link, no messages are lost
 type PerfectLink struct {
-	partner chan Message
+	ch chan *bitstring.BitString
 }
 
-func NewPerfectLink(partner chan Message) *PerfectLink {
-	return &PerfectLink{partner}
+func NewPerfectLink() *PerfectLink {
+	return &PerfectLink{make(chan *bitstring.BitString)}
 }
 
-func (pl *PerfectLink) Send(m Message) {
-	pl.partner <- m
+func (pl *PerfectLink) Send(bs *bitstring.BitString) {
+	pl.ch <- bs
 }
 
-func (pl *PerfectLink) Receive() Message {
-	return <-pl.partner
+func (pl *PerfectLink) Receive() *bitstring.BitString {
+	return <-pl.ch
 }
 
 // Simulated lossy link, messges sent over these have a probability [p] of being lost
 type LossyLink struct {
-	partner chan Message
-	p       float64
-	rng     random.Generator
+	ch  chan *bitstring.BitString
+	p   float64
+	rng *random.Generator
 }
 
-func NewLossyLink(partner chan Message) *LossyLink {
-	return &LossyLink{partner, 0.2, random.NewGeneratorFromConfig("prng")}
+func NewLossyLink() *LossyLink {
+	return &LossyLink{make(chan *bitstring.BitString), defaultBitCorruptionRate, random.NewGeneratorFromConfig("prng")}
 }
 
-func (ll *LossyLink) Send(m Message) {
-	if ll.rng.NextNormalizedFloat() > ll.p {
-		ll.partner <- m
+func (ll *LossyLink) Send(bs *bitstring.BitString) {
+	// Simulate corruption of message
+	for i := 0; i < bs.Length; i++ {
+		if ll.rng.NextNormalizedFloat() < ll.p {
+			bs.Invert(i)
+		}
 	}
+	ll.ch <- bs
 }
 
-func (ll *LossyLink) Receive() Message {
-	return <-ll.partner
+func (ll *LossyLink) Receive() *bitstring.BitString {
+	return <-ll.ch
 }

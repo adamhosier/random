@@ -149,6 +149,21 @@ func TestBitString_First(t *testing.T) {
 	}
 }
 
+func TestBitString_Invert(t *testing.T) {
+	bs, _:= BitStringFromString("1111100000")
+	bs.Invert(0)
+	want, _ := BitStringFromString("0111100000")
+	if !bs.Equals(want) {
+		t.Errorf("BitString.Invert(%d) == %q, expected %q", 0, bs, want)
+	}
+
+	bs.Invert(9)
+	want, _ = BitStringFromString("0111100001")
+	if !bs.Equals(want) {
+		t.Errorf("BitString.Invert(%d) == %q, expected %q", 9, bs, want)
+	}
+}
+
 func TestBitString_Substring(t *testing.T) {
 	bs1, _ := BitStringFromString("10101")
 	bs2, _ := BitStringFromString("010")
@@ -268,6 +283,27 @@ func TestBitString_Int(t *testing.T) {
 	if got != want {
 		t.Errorf("BitString.Int %q == %d, want %d", bs, got, want)
 	}
+}
+
+func TestBitString_Bytes(t *testing.T) {
+	want := []byte{0xDD, 0xF5, 0x9E, 0x00, 0xFF, 0x53}
+	bs, _ := BitStringFromBytes(&want)
+	got := bs.Bytes()
+
+	if len(got) != len(want) {
+		t.Errorf("BitString.Bytes() == 0x%X, want 0x%X", got, want)
+	} else {
+		failed := false
+		for i, v := range want {
+			if got[i] != v {
+				failed = true
+			}
+		}
+		if failed {
+			t.Errorf("BitString.Bytes() == 0x%X, want 0x%X", got, want)
+		}
+	}
+
 }
 
 func TestBitString_Compare(t *testing.T) {

@@ -50,6 +50,7 @@ func NewGeneratorFromConfig(name string) *Generator {
 	return NewGeneratorFromExtractable(configureExtractable(*config.Extractor))
 }
 
+// Compiles the json representation
 func configureExtractable(config ExtractableConfig) Extractable {
 	switch config.Type {
 	case "pseudorandom":

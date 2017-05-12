@@ -39,7 +39,7 @@ func BitStringFromBytes(bytes *[]byte) (*BitString, error) {
 	bs := make([]bool, n)
 	for i, b := range *bytes {
 		for j := 0; j < 8; j++ {
-			bs[i*8+j] = (b & 0x1) == 0x1
+			bs[(i+1)*8 - j - 1] = (b & 0x1) == 0x1
 			b = b >> 1
 		}
 	}
@@ -89,6 +89,11 @@ func (bs *BitString) First(n int) *BitString {
 	d := make([]bool, n)
 	copy(d, bs.Data[:n])
 	return &BitString{n, d}
+}
+
+// Inverts the [i]th bit of [bs]
+func (bs *BitString) Invert(i int) {
+	bs.Data[i] = !bs.Data[i]
 }
 
 // Finds the substring of [bs] starting at [start] of length [len]
@@ -176,7 +181,7 @@ func (bs *BitString) String() string {
 	return s
 }
 
-// Converts [bs] to an integer (max length 64)
+// Converts [bs] to an integer (max length 64), if bs.Length > 64, only the 64 rightmost bits will be taken
 func (bs *BitString) Int() int {
 	var n int
 	for i, b := range bs.Data {
@@ -185,6 +190,15 @@ func (bs *BitString) Int() int {
 		}
 	}
 	return n
+}
+
+// Converts [bs] to a byte array, discarding extra bits on the end
+func (bs *BitString) Bytes() []byte {
+	bytes := make([]byte, bs.Length / 8)
+	for i := range(bytes) {
+		bytes[i] = byte(bs.Substring(i * 8, 8).Int())
+	}
+	return bytes
 }
 
 // Compares if two bit strings contain the same bit sequence
