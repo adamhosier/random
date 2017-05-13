@@ -38,12 +38,13 @@ func NewLossyLink() *LossyLink {
 
 func (ll *LossyLink) Send(bs *bitstring.BitString) {
 	// Simulate corruption of message
+	cp := bs.Copy()
 	for i := 0; i < bs.Length; i++ {
 		if ll.rng.NextNormalizedFloat() < ll.p {
-			bs.Invert(i)
+			cp.Invert(i)
 		}
 	}
-	ll.ch <- bs
+	ll.ch <- cp
 }
 
 func (ll *LossyLink) Receive() *bitstring.BitString {

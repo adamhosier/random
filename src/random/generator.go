@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 	"path"
+	"github.com/adamhosier/random/src/bitstring"
 )
 
 // Generator config structure
@@ -127,4 +128,9 @@ func (g *Generator) NextIntBetween(start, end int) int {
 // Gets an integer consisting of n bits of randomness, with n < 64
 func (g *Generator) next(n int) int {
 	return g.e.GetBits(n).Int()
+}
+
+// Allow bits to be taken straight from the extractor
+func (g *Generator) GetBits(n int) *bitstring.BitString {
+	return g.e.GetBits(n)
 }

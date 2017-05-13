@@ -55,6 +55,11 @@ func BitStringFromInt(n, num int) *BitString {
 	return &BitString{n, data}
 }
 
+// Gets a zero-filled BitString of length [n]
+func BitStringOfLength(n int) *BitString {
+	return &BitString{n, make([]bool, n)}
+}
+
 // Gets a slice of all possible bit strings of length [n] (000, 001, 010, ... for n=3)
 func BitStringsOfLength(n int) []*BitString {
 	// Base case
@@ -71,6 +76,11 @@ func BitStringsOfLength(n int) []*BitString {
 		bss[2*i+1] = &BitString{n, append(d, true)}
 	}
 	return bss
+}
+
+// Returns a deep copy of [bs]
+func (bs *BitString) Copy() *BitString {
+	return 	bs.First(bs.Length)
 }
 
 // Gets the value of the bit at position [i] in [bs]
@@ -199,6 +209,41 @@ func (bs *BitString) Bytes() []byte {
 		bytes[i] = byte(bs.Substring(i * 8, 8).Int())
 	}
 	return bytes
+}
+
+// Computes the sum of two equal length BitStrings, discarding extra carry bits
+func (bs *BitString) BinaryAdd(other *BitString) *BitString {
+	if other.Length != bs.Length {
+		panic("BitString.BinaryAdd: BitStrings must be of equal length")
+	}
+	result := BitStringOfLength(bs.Length)
+	carry := 0
+	for i := bs.Length - 1; i >= 0; i-- {
+		if bs.At(i) {
+			carry++
+		}
+		if other.At(i) {
+			carry++
+		}
+		result.Data[i] = carry % 2 == 1
+		carry = carry / 2
+	}
+	return result
+}
+
+// Compute the product of two BitStrings, discarding extra carry bits
+func (bs *BitString) BinaryMul(other *BitString) *BitString {
+	if other.Length != bs.Length {
+		panic("BitString.BinaryMul: BitStrings must be of equal length")
+	}
+	result := BitStringOfLength(bs.Length)
+	for i := 0; i < bs.Length; i++ {
+		if bs.At(bs.Length - i - 1) {
+			bs2 := other.Extend(BitStringOfLength(i)).Substring(i, other.Length)
+			result = result.BinaryAdd(bs2)
+		}
+	}
+	return result
 }
 
 // Compares if two bit strings contain the same bit sequence

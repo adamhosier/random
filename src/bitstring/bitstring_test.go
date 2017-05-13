@@ -236,6 +236,90 @@ func TestBitString_HasTemplateAt(t *testing.T) {
 	}
 }
 
+func TestBitString_BinaryAdd(t *testing.T) {
+	bs1, _ := BitStringFromString("00001")
+	bs2, _ := BitStringFromString("00010")
+	bs3, _ := BitStringFromString("00011")
+	bs4, _ := BitStringFromString("00111")
+	bs5, _ := BitStringFromString("01111")
+	bs6, _ := BitStringFromString("11111")
+
+	got := bs1.BinaryAdd(bs2)
+	want, _ := BitStringFromString("00011")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryAdd (%q + %q) == %q, expected %q", bs1, bs2, got, want)
+	}
+
+	got = bs2.BinaryAdd(bs3)
+	want, _ = BitStringFromString("00101")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryAdd (%q + %q) == %q, expected %q", bs2, bs3, got, want)
+	}
+
+	got = bs3.BinaryAdd(bs3)
+	want, _ = BitStringFromString("00110")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryAdd (%q + %q) == %q, expected %q", bs3, bs3, got, want)
+	}
+
+	got = bs4.BinaryAdd(bs4)
+	want, _ = BitStringFromString("01110")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryAdd (%q + %q) == %q, expected %q", bs4, bs4, got, want)
+	}
+
+	got = bs5.BinaryAdd(bs5)
+	want, _ = BitStringFromString("11110")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryAdd (%q + %q) == %q, expected %q", bs5, bs5, got, want)
+	}
+
+	got = bs6.BinaryAdd(bs2)
+	want = bs1
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryAdd (%q + %q) == %q, expected %q", bs6, bs2, got, want)
+	}
+}
+
+func TestBitString_BinaryMul(t *testing.T) {
+	bs1, _ := BitStringFromString("00001")
+	bs2, _ := BitStringFromString("00010")
+	bs3, _ := BitStringFromString("00011")
+	bs4, _ := BitStringFromString("00111")
+	bs5, _ := BitStringFromString("01111")
+	bs6, _ := BitStringFromString("11111")
+
+	got := bs1.BinaryMul(bs2)
+	want, _ := BitStringFromString("00010")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryMul (%q * %q) == %q, expected %q", bs1, bs2, got, want)
+	}
+
+	got = bs3.BinaryMul(bs3)
+	want, _ = BitStringFromString("01001")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryMul (%q * %q) == %q, expected %q", bs3, bs3, got, want)
+	}
+
+	got = bs4.BinaryMul(bs3)
+	want, _ = BitStringFromString("10101")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryMul (%q * %q) == %q, expected %q", bs4, bs3, got, want)
+	}
+
+	got = bs5.BinaryMul(bs5)
+	want, _ = BitStringFromString("00001")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryMul (%q * %q) == %q, expected %q", bs5, bs5, got, want)
+	}
+
+	got = bs6.BinaryMul(bs2)
+	want, _ = BitStringFromString("11110")
+	if !got.Equals(want) {
+		t.Errorf("BitString.BinaryMul (%q * %q) == %q, expected %q", bs6, bs2, got, want)
+	}
+}
+
 func TestBitString_Equals(t *testing.T) {
 	bs1, _ := BitStringFromString("0010")
 	bs2, _ := BitStringFromString("0010")
