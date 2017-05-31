@@ -21,6 +21,14 @@ func (pl *PerfectLink) Send(bs *bitstring.BitString) {
 	pl.ch <- bs
 }
 
+func (pl *PerfectLink) Send0() {
+	pl.Send(bitstring.BitStringFromInt(1, 0))
+}
+
+func (pl *PerfectLink) Send1() {
+	pl.Send(bitstring.BitStringFromInt(1, 1))
+}
+
 func (pl *PerfectLink) Receive() *bitstring.BitString {
 	return <-pl.ch
 }
