@@ -3,14 +3,13 @@ package random
 import (
 	"github.com/adamhosier/random/src/bitstring"
 	"math"
-	"math/rand"
 )
 
 type Extractable interface {
 	GetBits(int) *bitstring.BitString
 }
 
-const defaultBlockSize int = 8
+const defaultBlockSize int = 16
 
 type InnerProductExtractor struct {
 	input1    Extractable
@@ -55,9 +54,10 @@ func NewRandomWalkExtractor(i1, i2 Extractable) *RandomWalkExtractor {
 func (e *RandomWalkExtractor) GetBits(n int) *bitstring.BitString {
 	// Cache of already constructed nodes, initially empty
 	gns := make(map[string]randomGraphNode)
+	rng := NewPseudoRandomExtractor(e.input1.GetBits(64).Int())
 
 	// Calculate number of steps to reach a random point
-	steps := 10 * int(math.Log2(float64(n)))
+	steps := 2 * int(math.Log2(float64(n)))
 
 	// Get start node from weak input
 	startBits := e.input1.GetBits(n)
@@ -70,11 +70,11 @@ func (e *RandomWalkExtractor) GetBits(n int) *bitstring.BitString {
 		if current.neighbours[0] == nil {
 			for j := 0; j < e.d; j++ {
 				// Get bits from weak input
-				bits := e.input1.GetBits(n)
+				bits := rng.GetBits(n)
 
 				// If this node hasn't been visited, add it to the graph then set it as a neighbour
 				if _, exists := gns[bits.Hash()]; !exists {
-					gns[bits.Hash()] = randomGraphNode{startBits, make([]*randomGraphNode, e.d)}
+					gns[bits.Hash()] = randomGraphNode{bits, make([]*randomGraphNode, e.d)}
 				}
 				node := gns[bits.Hash()]
 				current.neighbours[j] = &node
@@ -109,7 +109,6 @@ func (e *PseudoRandomExtractor) GetBits(n int) *bitstring.BitString {
 
 		// return next value in the sequence
 		b := e.seed >> uint(48-numBits)
-		rand.Int()
 
 		// Add these bits to our result
 		result = result.Extend(bitstring.BitStringFromInt(numBits, b))

@@ -13,7 +13,7 @@ func Hash(msg, a, b *bitstring.BitString) *bitstring.BitString {
 // Shuffles the BitString [bs] given a seed to a prng [seed]
 func Shuffle(bs *bitstring.BitString, seed int) {
 	rng := random.NewGeneratorFromExtractable(random.NewPseudoRandomExtractor(seed))
-	for i := 0; i < bs.Length - 2; i++ {
+	for i := 0; i < bs.Length-2; i++ {
 		j := rng.NextIntBetween(i, bs.Length)
 		bs.Data[i], bs.Data[j] = bs.Data[j], bs.Data[i]
 	}
@@ -34,7 +34,7 @@ func BobParts(pl *PerfectLink, parts []*bitstring.BitString) bool {
 	for _, part := range parts {
 		parity := pl.Receive().Int()
 		// If parity differs, notify Alice
-		if parity != part.Ones() % 2 {
+		if parity != part.Ones()%2 {
 			pl.Send0()
 			// call subblocks
 		} else {
@@ -141,4 +141,3 @@ func main() {
 	<-done
 	fmt.Println("DONE")
 }
-

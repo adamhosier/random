@@ -150,7 +150,7 @@ func TestBitString_First(t *testing.T) {
 }
 
 func TestBitString_Invert(t *testing.T) {
-	bs, _:= BitStringFromString("1111100000")
+	bs, _ := BitStringFromString("1111100000")
 	bs.Invert(0)
 	want, _ := BitStringFromString("0111100000")
 	if !bs.Equals(want) {

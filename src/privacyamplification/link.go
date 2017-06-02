@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/adamhosier/random/src/random"
 	"github.com/adamhosier/random/src/bitstring"
+	"github.com/adamhosier/random/src/random"
 )
 
 const (
 	defaultBitCorruptionRate = 0.1 // Rate at which bits are flipped when sending over a lossy link [0..1]
 )
+
 // Perfect p2p link, no messages are lost
 type PerfectLink struct {
 	ch chan *bitstring.BitString

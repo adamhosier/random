@@ -1,27 +1,13 @@
 package main
 
 import (
-	"github.com/adamhosier/random/src/random"
 	"fmt"
+	"github.com/adamhosier/random/src/random"
 )
 
 func main() {
-	r := random.NewGeneratorFromConfig("prng")
-	max := 10
-	data := make([]int, max)
-	for i := 0; i < 10000; i++ {
-		n := r.NextIntBetween(0, max)
-		data[n]++
-	}
-	for i := 0; i < max; i++ {
-		fmt.Printf("%d: %d\n", i, data[i])
-	}
-}
-
-/*
-func main() {
 	fmt.Println("\nWEBCAM INPUT")
-	webcamInput := random.NewInput("input_bin/audio")
+	webcamInput := random.NewInput("input_bin/webcam")
 	test(webcamInput, 1000)
 
 	fmt.Println("\nAUDIO INPUT")
@@ -32,10 +18,11 @@ func main() {
 	test(random.NewInnerProductExtractor(webcamInput, audioInput), 1000)
 
 	fmt.Println("\nRANDOM WALK EXTRACTOR")
-	randomOrgInput := random.NewInput("input_bin/randomorg")
-	test(random.NewRandomWalkExtractor(audioInput, randomOrgInput), 500)
+	sysTimeInput := random.NewInput("input_bin/time")
+	test(random.NewRandomWalkExtractor(webcamInput, sysTimeInput), 500)
 
 	fmt.Println("\nPSEUDO-RANDOM EXTRACTOR")
+	randomOrgInput := random.NewInput("input_bin/randomorg")
 	test(random.NewPseudoRandomExtractor(randomOrgInput.GetBits(64).Int()), 1000)
 }
 
@@ -55,4 +42,3 @@ func test(e random.Extractable, numBits int) {
 		fmt.Println("ALL PASSED")
 	}
 }
-*/

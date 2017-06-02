@@ -1,0 +1,13 @@
+{
+  "extractor": {
+    "type": "randomwalk",
+    "input1": {
+      "type": "input",
+      "path": "input_bin/audio"
+    },
+    "input2": {
+      "type": "input",
+      "path": "input_bin/time"
+    }
+  }
+}

@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	fmt.Printf("%X",time.Now().Nanosecond())
+	fmt.Printf("%X", time.Now().Nanosecond())
 }

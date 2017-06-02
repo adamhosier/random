@@ -39,7 +39,7 @@ func BitStringFromBytes(bytes *[]byte) (*BitString, error) {
 	bs := make([]bool, n)
 	for i, b := range *bytes {
 		for j := 0; j < 8; j++ {
-			bs[(i+1)*8 - j - 1] = (b & 0x1) == 0x1
+			bs[(i+1)*8-j-1] = (b & 0x1) == 0x1
 			b = b >> 1
 		}
 	}
@@ -80,7 +80,7 @@ func BitStringsOfLength(n int) []*BitString {
 
 // Returns a deep copy of [bs]
 func (bs *BitString) Copy() *BitString {
-	return 	bs.First(bs.Length)
+	return bs.First(bs.Length)
 }
 
 // Gets the value of the bit at position [i] in [bs]
@@ -204,9 +204,9 @@ func (bs *BitString) Int() int {
 
 // Converts [bs] to a byte array, discarding extra bits on the end
 func (bs *BitString) Bytes() []byte {
-	bytes := make([]byte, bs.Length / 8)
-	for i := range(bytes) {
-		bytes[i] = byte(bs.Substring(i * 8, 8).Int())
+	bytes := make([]byte, bs.Length/8)
+	for i := range bytes {
+		bytes[i] = byte(bs.Substring(i*8, 8).Int())
 	}
 	return bytes
 }
@@ -225,7 +225,7 @@ func (bs *BitString) BinaryAdd(other *BitString) *BitString {
 		if other.At(i) {
 			carry++
 		}
-		result.Data[i] = carry % 2 == 1
+		result.Data[i] = carry%2 == 1
 		carry = carry / 2
 	}
 	return result

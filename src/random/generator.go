@@ -3,11 +3,11 @@ package random
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/adamhosier/random/src/bitstring"
 	"math"
 	"os"
-	"runtime"
 	"path"
-	"github.com/adamhosier/random/src/bitstring"
+	"runtime"
 )
 
 // Generator config structure

@@ -3,7 +3,7 @@
     "type": "pseudorandom",
     "seedGenerator": {
       "type": "input",
-      "path": "input_bin/randomorg"
+      "path": "input_bin/time"
     }
   }
 }

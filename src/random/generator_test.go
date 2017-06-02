@@ -27,7 +27,7 @@ func TestGenerator_NextFloat64(t *testing.T) {
 func TestGenerator_NextIntBetween(t *testing.T) {
 	r := NewGenerator()
 	f := func(min, max int) {
-		for i := 0; i < 10 * (max - min); i++ {
+		for i := 0; i < 10*(max-min); i++ {
 			n := r.NextIntBetween(min, max)
 			if n < min || n >= max {
 				t.Errorf("Generator.NextIntBetween(%d, %d) produced value outside the range %d", min, max, n)
