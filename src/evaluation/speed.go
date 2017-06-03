@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/adamhosier/random/src/random"
-	"fmt"
 	crand "crypto/rand"
-	"time"
+	"fmt"
+	"github.com/adamhosier/random/src/random"
 	"math/rand"
+	"time"
 )
 
 const (
@@ -24,7 +24,6 @@ func main() {
 	rand.Read(make([]byte, NUM_BITS))
 	goPrng := time.Since(start).Nanoseconds() / 1000
 	fmt.Printf("Go PRNG: %dms\n", goPrng)
-
 
 	// prng
 	prng := time_gen(random.NewGeneratorFromConfig("prng"))
@@ -60,4 +59,3 @@ func time_gen(g *random.Generator) int64 {
 
 	return elapsed.Nanoseconds() / 1000
 }
-
