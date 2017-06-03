@@ -77,7 +77,7 @@ func BobParts(pl *PerfectLink, parts []*bitstring.BitString) *bitstring.BitStrin
 
 func Alice(pl *PerfectLink, ll *LossyLink, done chan bool) {
 	// Randomly generate secret
-	rng := random.NewGeneratorFromConfig("innerprod")
+	rng := random.NewGeneratorFromConfig("prng") // TODO: make this strong
 	secret := rng.GetBits(SECRET_LEN)
 
 	// Send secret over the private, lossy channel
@@ -107,10 +107,11 @@ func Alice(pl *PerfectLink, ll *LossyLink, done chan bool) {
 
 	// Repeat error correction attempts until a secret is agreed
 	secretAgreed := false
+	round := 1
 	for !secretAgreed {
 		// Attempt to fix errors
 		Shuffle(secret, a.Int())
-		parts := secret.PartitionExtra(PARTITION_SIZE)
+		parts := secret.PartitionExtra(PARTITION_SIZE * round)
 		secret = AliceParts(pl, parts)
 		fmt.Printf("Alice: Error correction attempt: 0x%X\n", secret.Bytes())
 
@@ -122,6 +123,7 @@ func Alice(pl *PerfectLink, ll *LossyLink, done chan bool) {
 		// Send this hash to Bob to validate it
 		pl.Send(hash)
 		secretAgreed = pl.Receive().Int() == 1
+		round++
 	}
 
 	fmt.Printf("Alice: Secret has been agreed to be 0x%X\n", secret.Bytes())
@@ -132,7 +134,7 @@ func Alice(pl *PerfectLink, ll *LossyLink, done chan bool) {
 func Bob(pl *PerfectLink, ll *LossyLink, done chan bool) {
 	// Wait for secret to be sent from Alice
 	secret := ll.Receive()
-	fmt.Printf("Bob:  Received the secret 0x%X\n", secret.Bytes())
+	fmt.Printf("Bob: Received the secret  0x%X\n", secret.Bytes())
 
 	// Receive the hash information
 	a := pl.Receive()
@@ -151,7 +153,7 @@ func Bob(pl *PerfectLink, ll *LossyLink, done chan bool) {
 	}
 
 	fmt.Println("Bob: received an incorrect hash, trying single bit-twiddling")
-	rng := random.NewGeneratorFromConfig("innerprod")
+	rng := random.NewGeneratorFromConfig("prng") // TODO: make this strong
 	// Try 100 random bit-twiddles
 	for i := 0; i < 100; i++ {
 		n := rng.NextIntBetween(0, secret.Length)
@@ -175,10 +177,11 @@ func Bob(pl *PerfectLink, ll *LossyLink, done chan bool) {
 
 	// Repeat error correction attempts until secret is agreed
 	secretAgreed := false
+	round := 1
 	for !secretAgreed {
 		// Attempt to fix errors
 		Shuffle(secret, a.Int())
-		parts := secret.PartitionExtra(PARTITION_SIZE)
+		parts := secret.PartitionExtra(PARTITION_SIZE*round)
 		secret = BobParts(pl, parts)
 		fmt.Printf("Bob: Error correction attempt:   0x%X\n", secret.Bytes())
 
@@ -193,9 +196,10 @@ func Bob(pl *PerfectLink, ll *LossyLink, done chan bool) {
 		if !secretAgreed {
 			pl.Send0()
 		}
+		round++
 	}
 	pl.Send1()
-	fmt.Printf("Bob: Secret has been agreed to be   0x%X\n", secret.Bytes())
+	fmt.Printf("Bob: Secret has been agreed to be   0x%X (len %d)\n", secret.Bytes(), secret.Length)
 
 	done <- true
 }

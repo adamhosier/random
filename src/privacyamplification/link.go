@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	defaultBitCorruptionRate = 0.1 // Rate at which bits are flipped when sending over a lossy link [0..1]
+	defaultBitCorruptionRate = 1.0 / 32.0 // Rate at which bits are flipped when sending over a lossy link [0..1]
 )
 
 // Perfect p2p link, no messages are lost
