@@ -7,9 +7,16 @@ import (
 )
 
 const (
+	VERBOSE = false
 	SECRET_LEN = 512
 	PARTITION_SIZE = 16
 )
+
+func Log(format string, args ...interface{}) {
+	if VERBOSE {
+		fmt.Printf(format, args...)
+	}
+}
 
 func Hash(msg, a, b *bitstring.BitString) *bitstring.BitString {
 	return msg.BinaryMul(a).BinaryAdd(b)
@@ -75,13 +82,13 @@ func BobParts(pl *PerfectLink, parts []*bitstring.BitString) *bitstring.BitStrin
 	return result
 }
 
-func Alice(pl *PerfectLink, ll *LossyLink, done chan bool) {
+func Alice(pl *PerfectLink, ll *LossyLink, done chan *bitstring.BitString) {
 	// Randomly generate secret
 	rng := random.NewGeneratorFromConfig("prng") // TODO: make this strong
 	secret := rng.GetBits(SECRET_LEN)
 
 	// Send secret over the private, lossy channel
-	fmt.Printf("Alice: Sending the secret 0x%X over the private channel\n", secret.Bytes())
+	Log("Alice: Sending the secret 0x%X over the private channel\n", secret.Bytes())
 	ll.Send(secret)
 
 	// Hash the secret, using values securely generated
@@ -90,7 +97,7 @@ func Alice(pl *PerfectLink, ll *LossyLink, done chan bool) {
 	hash := Hash(secret, a, b)
 
 	// Broadcast the randomly generated BitStrings, and the hash value
-	fmt.Printf("Alice: Sending the hash 0x%X with values 0x%X and 0x%X over the public channel\n",
+	Log("Alice: Sending the hash 0x%X with values 0x%X and 0x%X over the public channel\n",
 		hash.Bytes(), a.Bytes(), b.Bytes())
 	pl.Send(a)
 	pl.Send(b)
@@ -98,12 +105,10 @@ func Alice(pl *PerfectLink, ll *LossyLink, done chan bool) {
 
 	status := pl.Receive().Int()
 	if status == 1 {
-		fmt.Printf("Alice: Notified of success, secret agreed as 0x%X\n", secret.Bytes())
-		done <- true
+		Log("Alice: Notified of success, secret agreed as 0x%X\n", secret.Bytes())
+		done <- secret
 		return
 	}
-
-	fmt.Println("Alice: Notified of bit-twiddling failure")
 
 	// Repeat error correction attempts until a secret is agreed
 	secretAgreed := false
@@ -113,7 +118,7 @@ func Alice(pl *PerfectLink, ll *LossyLink, done chan bool) {
 		Shuffle(secret, a.Int())
 		parts := secret.PartitionExtra(PARTITION_SIZE * round)
 		secret = AliceParts(pl, parts)
-		fmt.Printf("Alice: Error correction attempt: 0x%X\n", secret.Bytes())
+		Log("Alice: Error correction attempt: 0x%X\n", secret.Bytes())
 
 		// Recalculate hash to verify errors
 		a = a.Substring(0, secret.Length)
@@ -126,33 +131,33 @@ func Alice(pl *PerfectLink, ll *LossyLink, done chan bool) {
 		round++
 	}
 
-	fmt.Printf("Alice: Secret has been agreed to be 0x%X\n", secret.Bytes())
+	Log("Alice: Secret has been agreed to be 0x%X\n", secret.Bytes())
 
-	done <- true
+	done <- secret
 }
 
-func Bob(pl *PerfectLink, ll *LossyLink, done chan bool) {
+func Bob(pl *PerfectLink, ll *LossyLink, done chan *bitstring.BitString) {
 	// Wait for secret to be sent from Alice
 	secret := ll.Receive()
-	fmt.Printf("Bob: Received the secret  0x%X\n", secret.Bytes())
+	Log("Bob: Received the secret  0x%X\n", secret.Bytes())
 
 	// Receive the hash information
 	a := pl.Receive()
 	b := pl.Receive()
 	hashA := pl.Receive()
 	hashB := Hash(secret, a, b)
-	fmt.Printf("Bob: Calculated hash as 0x%X\n", hashB.Bytes())
+	Log("Bob: Calculated hash as 0x%X\n", hashB.Bytes())
 
 	// Compare the received hash, to our own calculated hash
 	if hashA.Equals(hashB) {
-		fmt.Println("Bob: Received the correct secret, the value is accepted")
+		Log("Bob: Received the correct secret, the value is accepted")
 		// Notify Alice of success
 		pl.Send1()
-		done <- true
+		done <- secret
 		return
 	}
 
-	fmt.Println("Bob: received an incorrect hash, trying single bit-twiddling")
+	Log("Bob: received an incorrect hash, trying single bit-twiddling\n")
 	rng := random.NewGeneratorFromConfig("prng") // TODO: make this strong
 	// Try 100 random bit-twiddles
 	for i := 0; i < 100; i++ {
@@ -162,10 +167,10 @@ func Bob(pl *PerfectLink, ll *LossyLink, done chan bool) {
 		hashCandidate := Hash(secretCandidate, a, b)
 		// Check if this modification fixes the error
 		if hashCandidate.Equals(hashA) {
-			fmt.Printf("Bob: Bit twiddling corrected the secret to 0x%X\n", secretCandidate.Bytes())
+			Log("Bob: Bit twiddling corrected the secret to 0x%X\n", secretCandidate.Bytes())
 			// Notify Alice of completion by sending a 1
 			pl.Send1()
-			done <- true
+			done <- secretCandidate
 			return
 		}
 	}
@@ -173,7 +178,7 @@ func Bob(pl *PerfectLink, ll *LossyLink, done chan bool) {
 	// Notify Alice of failure by sending a 0
 	pl.Send0()
 
-	fmt.Println("Bob: Bit twiddling failed, continuing privacy amplification")
+	Log("Bob: Bit twiddling failed, continuing privacy amplification\n")
 
 	// Repeat error correction attempts until secret is agreed
 	secretAgreed := false
@@ -183,7 +188,7 @@ func Bob(pl *PerfectLink, ll *LossyLink, done chan bool) {
 		Shuffle(secret, a.Int())
 		parts := secret.PartitionExtra(PARTITION_SIZE*round)
 		secret = BobParts(pl, parts)
-		fmt.Printf("Bob: Error correction attempt:   0x%X\n", secret.Bytes())
+		Log("Bob: Error correction attempt:   0x%X\n", secret.Bytes())
 
 		// Recalculate hash
 		a = a.Substring(0, secret.Length)
@@ -199,13 +204,13 @@ func Bob(pl *PerfectLink, ll *LossyLink, done chan bool) {
 		round++
 	}
 	pl.Send1()
-	fmt.Printf("Bob: Secret has been agreed to be   0x%X (len %d)\n", secret.Bytes(), secret.Length)
+	Log("Bob: Secret has been agreed to be   0x%X (len %d)\n", secret.Bytes(), secret.Length)
 
-	done <- true
+	done <- secret
 }
 
 func main() {
-	done := make(chan bool)
+	done := make(chan *bitstring.BitString)
 	pl := NewPerfectLink()
 	ll := NewLossyLink()
 	go Alice(pl, ll, done)
