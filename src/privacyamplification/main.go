@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	VERBOSE = false
+	VERBOSE = true
 	SECRET_LEN = 512
 	PARTITION_SIZE = 16
 )
@@ -84,7 +84,7 @@ func BobParts(pl *PerfectLink, parts []*bitstring.BitString) *bitstring.BitStrin
 
 func Alice(pl *PerfectLink, ll *LossyLink, done chan *bitstring.BitString) {
 	// Randomly generate secret
-	rng := random.NewGeneratorFromConfig("prng") // TODO: make this strong
+	rng := random.NewGeneratorFromConfig("innerprod")
 	secret := rng.GetBits(SECRET_LEN)
 
 	// Send secret over the private, lossy channel
@@ -158,7 +158,7 @@ func Bob(pl *PerfectLink, ll *LossyLink, done chan *bitstring.BitString) {
 	}
 
 	Log("Bob: received an incorrect hash, trying single bit-twiddling\n")
-	rng := random.NewGeneratorFromConfig("prng") // TODO: make this strong
+	rng := random.NewGeneratorFromConfig("innerprod")
 	// Try 100 random bit-twiddles
 	for i := 0; i < 100; i++ {
 		n := rng.NextIntBetween(0, secret.Length)

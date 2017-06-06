@@ -9,12 +9,12 @@ type Extractable interface {
 	GetBits(int) *bitstring.BitString
 }
 
-const defaultBlockSize int = 16
+const defaultBlockSize int = 8
 
 type InnerProductExtractor struct {
 	input1    Extractable
 	input2    Extractable
-	blockSize int // Size of subsequences to take the inner product over to produce one bit
+	blockSize int         // Number of blocks to compute the inner product over
 }
 
 // Creates a new inner product extractor combining [i1] and [i2]
@@ -24,11 +24,15 @@ func NewInnerProductExtractor(i1, i2 Extractable) *InnerProductExtractor {
 
 // Gets a BitString of length [n] containing the inner product over GF(2) of two inputs
 func (e *InnerProductExtractor) GetBits(n int) *bitstring.BitString {
-	bs := &bitstring.BitString{}
-	for i := 0; i < n; i++ {
-		b1 := e.input1.GetBits(e.blockSize)
-		b2 := e.input2.GetBits(e.blockSize)
-		bs.Add(b1.InnerProduct(b2)%2 == 1)
+	bs := bitstring.BitStringOfLength(n)
+
+	// Get a list of blocks containing [n] bits
+	input1 := e.input1.GetBits(e.blockSize*n).Partition(n)
+	input2 := e.input2.GetBits(e.blockSize*n).Partition(n)
+
+	// Compute the inner product over these bits
+	for i := 0; i < e.blockSize; i++ {
+		bs = bs.BinaryAdd(input1[i].BinaryMul(input2[i]))
 	}
 	return bs
 }
